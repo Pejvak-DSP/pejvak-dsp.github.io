@@ -32,7 +32,6 @@
             font-family: var(--font-sans);
             line-height: 1.6;
             overflow-x: hidden;
-            /* Hide default cursor to use custom one */
             cursor: none; 
         }
 
@@ -100,20 +99,30 @@
             border-radius: 50%;
         }
 
-        /* Navigation */
+        /* =========================================
+           NAVIGATION & SCROLL EFFECTS
+           ========================================= */
         nav {
             position: fixed;
             top: 0;
             width: 100%;
-            padding: 20px 48px;
+            padding: 32px 48px; /* Initial larger padding */
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: transparent; /* Transparent at the very top */
+            border-bottom: 1px solid transparent;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* Smooth transition */
+            z-index: 100;
+        }
+
+        /* This class is added by JavaScript when scrolling down */
+        nav.scrolled {
+            padding: 16px 48px; /* Shrink padding */
             background: rgba(10, 15, 30, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
-            z-index: 100;
         }
         
         .logo-container {
@@ -122,16 +131,19 @@
             gap: 12px;
             text-decoration: none;
         }
+
         .logo-img {
-            height: 48px;
+            height: 85px; /* Larger logo at the top */
             width: auto;
-            /* This filter blends the logo's white background into the dark theme */
             mix-blend-mode: screen; 
-            filter: drop-shadow(0 0 10px rgba(103, 232, 249, 0.3));
-            transition: filter 0.3s ease;
+            filter: drop-shadow(0 0 15px rgba(103, 232, 249, 0.4));
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        .logo-container:hover .logo-img {
-            filter: drop-shadow(0 0 20px rgba(103, 232, 249, 0.6));
+
+        /* Logo shrinks when nav has 'scrolled' class */
+        nav.scrolled .logo-img {
+            height: 48px;
+            filter: drop-shadow(0 0 8px rgba(103, 232, 249, 0.2));
         }
 
         .nav-links a {
@@ -152,7 +164,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 140px 20px 60px;
+            padding: 180px 20px 60px; /* Increased top padding to accommodate large logo */
         }
         .hero-badge {
             background: rgba(103, 232, 249, 0.1);
@@ -292,7 +304,6 @@
             overflow: hidden;
         }
         
-        /* Glowing layer that follows the mouse and fades in smoothly */
         .card::before {
             content: '';
             position: absolute;
@@ -305,17 +316,16 @@
                 rgba(103, 232, 249, 0.12),
                 transparent 40%
             );
-            opacity: 0; /* Hidden by default */
-            transition: opacity 0.4s ease; /* Smooth fade transition */
-            pointer-events: none; /* Prevents blocking clicks */
+            opacity: 0; 
+            transition: opacity 0.4s ease; 
+            pointer-events: none; 
             z-index: 0;
         }
 
         .card:hover::before {
-            opacity: 1; /* Show on hover */
+            opacity: 1; 
         }
 
-        /* Place card content above the glowing layer */
         .card > * {
             position: relative;
             z-index: 1;
@@ -452,8 +462,12 @@
         @media (max-width: 768px) {
             body { cursor: auto; }
             .cursor-dot, .cursor-outline { display: none; }
-            nav { padding: 20px 24px; }
+            nav { padding: 20px 24px; background: rgba(10, 15, 30, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+            nav.scrolled { padding: 16px 24px; }
             .nav-links { display: none; }
+            .logo-img { height: 50px; } /* Smaller logo on mobile */
+            nav.scrolled .logo-img { height: 40px; }
+            .hero { padding-top: 120px; }
             .hero-actions { flex-direction: column; width: 100%; padding: 0 20px; }
             .btn { width: 100%; text-align: center; }
             .features, .download, .about, .credits { padding: 60px 24px; }
@@ -475,9 +489,8 @@
     </div>
 
     <!-- Navigation -->
-    <nav>
+    <nav id="navbar">
         <a href="#" class="logo-container">
-            <!-- Make sure images/logo.png exists in your repository -->
             <img src="images/logo.png" alt="Pejvak DSP Logo" class="logo-img">
         </a>
         
@@ -502,7 +515,6 @@
         </div>
 
         <div class="hero-image-wrapper fade-up">
-            <!-- Make sure images/screenshot.png exists in your repository -->
             <img src="images/screenshot.png" alt="PEJVAK RVB Interface" class="hero-image" onerror="this.src='https://via.placeholder.com/1100x600/131a30/67e8f9?text=Upload+images/screenshot.png'">
         </div>
     </section>
@@ -648,22 +660,19 @@
             window.addEventListener('mousemove', (e) => {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
-                // The dot follows the cursor immediately
                 cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
             });
 
-            // Animation loop for the trailing effect of the outer cursor
             function animateCursor() {
                 let distX = mouseX - outlineX;
                 let distY = mouseY - outlineY;
-                outlineX += distX * 0.15; // Lower value = slower/smoother trailing
+                outlineX += distX * 0.15;
                 outlineY += distY * 0.15;
                 cursorOutline.style.transform = `translate(${outlineX}px, ${outlineY}px) translate(-50%, -50%)`;
                 requestAnimationFrame(animateCursor);
             }
             animateCursor();
 
-            // Enlarge cursor on links, buttons, and cards
             const hoverables = document.querySelectorAll('a, button, .card');
             hoverables.forEach(el => {
                 el.addEventListener('mouseenter', () => cursorOutline.classList.add('hovering'));
@@ -677,10 +686,20 @@
                     const rect = card.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
-                    // Update CSS variables with mouse coordinates
                     card.style.setProperty('--mouse-x', `${x}px`);
                     card.style.setProperty('--mouse-y', `${y}px`);
                 });
+            });
+
+            // --- 4. Shrink Header and Logo on Scroll ---
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                // If the page is scrolled more than 50 pixels, add the 'scrolled' class
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
             });
         });
     </script>
