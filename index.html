@@ -20,6 +20,11 @@
             --font-mono: 'JetBrains Mono', monospace;
         }
 
+        /* Enable smooth scrolling for the entire page */
+        html {
+            scroll-behavior: smooth;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -39,7 +44,20 @@
         a:hover { opacity: 0.8; }
 
         /* =========================================
-           CUSTOM ANIMATED CURSOR
+           Sound Wave Canvas Effect
+           ========================================= */
+        #waveCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; 
+            pointer-events: none; 
+        }
+
+        /* =========================================
+           Custom Animated Cursor
            ========================================= */
         .cursor-dot, .cursor-outline {
             position: fixed;
@@ -69,14 +87,16 @@
             border-color: var(--accent-cyan);
         }
 
-        /* Background Gradients */
+        /* =========================================
+           Background Gradients
+           ========================================= */
         .bg-glow {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -1;
+            z-index: -2; 
             overflow: hidden;
             pointer-events: none;
         }
@@ -100,25 +120,24 @@
         }
 
         /* =========================================
-           NAVIGATION & SCROLL EFFECTS
+           Navigation & Scroll Effects
            ========================================= */
         nav {
             position: fixed;
             top: 0;
             width: 100%;
-            padding: 32px 48px; /* Initial larger padding */
+            padding: 32px 48px; 
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: transparent; /* Transparent at the very top */
+            background: transparent; 
             border-bottom: 1px solid transparent;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* Smooth transition */
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
             z-index: 100;
         }
 
-        /* This class is added by JavaScript when scrolling down */
         nav.scrolled {
-            padding: 16px 48px; /* Shrink padding */
+            padding: 16px 48px; 
             background: rgba(10, 15, 30, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -133,14 +152,13 @@
         }
 
         .logo-img {
-            height: 85px; /* Larger logo at the top */
+            height: 85px; 
             width: auto;
             mix-blend-mode: screen; 
             filter: drop-shadow(0 0 15px rgba(103, 232, 249, 0.4));
             transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* Logo shrinks when nav has 'scrolled' class */
         nav.scrolled .logo-img {
             height: 48px;
             filter: drop-shadow(0 0 8px rgba(103, 232, 249, 0.2));
@@ -156,6 +174,54 @@
         }
         .nav-links a:hover { color: var(--accent-cyan); }
 
+        /* =========================================
+           Back to Top Button
+           ========================================= */
+        #backToTop {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(22, 30, 54, 0.6);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: none; 
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 99;
+            backdrop-filter: blur(10px);
+        }
+        #backToTop.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        #backToTop:hover {
+            background: var(--accent-cyan);
+            color: var(--bg);
+            box-shadow: 0 0 20px rgba(103, 232, 249, 0.4);
+        }
+        #backToTop svg {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.2s;
+        }
+        #backToTop:hover svg {
+            transform: translateY(-2px);
+        }
+
+        /* Add scroll margin to sections to offset the fixed header */
+        section {
+            scroll-margin-top: 100px; 
+        }
+
         /* Hero Section */
         .hero {
             min-height: 100vh;
@@ -164,7 +230,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 180px 20px 60px; /* Increased top padding to accommodate large logo */
+            padding: 180px 20px 60px; 
         }
         .hero-badge {
             background: rgba(103, 232, 249, 0.1);
@@ -304,6 +370,7 @@
             overflow: hidden;
         }
         
+        /* Glowing layer that follows the mouse and fades in smoothly */
         .card::before {
             content: '';
             position: absolute;
@@ -462,10 +529,11 @@
         @media (max-width: 768px) {
             body { cursor: auto; }
             .cursor-dot, .cursor-outline { display: none; }
+            #backToTop { cursor: pointer; bottom: 20px; right: 20px; }
             nav { padding: 20px 24px; background: rgba(10, 15, 30, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
             nav.scrolled { padding: 16px 24px; }
             .nav-links { display: none; }
-            .logo-img { height: 50px; } /* Smaller logo on mobile */
+            .logo-img { height: 50px; }
             nav.scrolled .logo-img { height: 40px; }
             .hero { padding-top: 120px; }
             .hero-actions { flex-direction: column; width: 100%; padding: 0 20px; }
@@ -473,20 +541,31 @@
             .features, .download, .about, .credits { padding: 60px 24px; }
             footer { flex-direction: column; gap: 24px; text-align: center; }
             .footer-links a { margin: 0 12px; }
+            section { scroll-margin-top: 70px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- Canvas for Sound Wave Effect -->
+    <canvas id="waveCanvas"></canvas>
+
     <!-- Custom Cursor Elements -->
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
 
-    <!-- Background Glows -->
+    <!-- Background Gradients -->
     <div class="bg-glow">
         <div class="glow-1"></div>
         <div class="glow-2"></div>
     </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" title="Go to top" aria-label="Go to top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </button>
 
     <!-- Navigation -->
     <nav id="navbar">
@@ -515,7 +594,7 @@
         </div>
 
         <div class="hero-image-wrapper fade-up">
-            <img src="images/screenshot.jpg" alt="PEJVAK RVB Interface" class="hero-image" onerror="this.src='https://via.placeholder.com/1100x600/131a30/67e8f9?text=Upload+images/screenshot.jpg'">
+            <img src="images/screenshot.png" alt="PEJVAK RVB Interface" class="hero-image" onerror="this.src='https://via.placeholder.com/1100x600/131a30/67e8f9?text=Upload+images/screenshot.png'">
         </div>
     </section>
 
@@ -691,16 +770,85 @@
                 });
             });
 
-            // --- 4. Shrink Header and Logo on Scroll ---
+            // --- 4. Scroll Effects & Back to Top Button ---
             const navbar = document.getElementById('navbar');
+            const backToTopBtn = document.getElementById('backToTop');
+
             window.addEventListener('scroll', () => {
-                // If the page is scrolled more than 50 pixels, add the 'scrolled' class
                 if (window.scrollY > 50) {
                     navbar.classList.add('scrolled');
                 } else {
                     navbar.classList.remove('scrolled');
                 }
+                
+                // Show Back to Top button after scrolling down 500px
+                if (window.scrollY > 500) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
             });
+
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            // --- 5. Audio Wave Effect on Mouse Move ---
+            const canvas = document.getElementById('waveCanvas');
+            const ctx = canvas.getContext('2d');
+            let waves = [];
+            let lastMouseMove = 0;
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            window.addEventListener('mousemove', (e) => {
+                const now = Date.now();
+                // Throttle wave creation for performance (every 60ms)
+                if (now - lastMouseMove > 60) {
+                    waves.push({
+                        x: e.clientX,
+                        y: e.clientY,
+                        radius: 0,
+                        opacity: 1
+                    });
+                    lastMouseMove = now;
+                }
+            });
+
+            function drawWaves() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = waves.length - 1; i >= 0; i--) {
+                    let w = waves[i];
+                    w.radius += 2; 
+                    w.opacity -= 0.025; 
+
+                    if (w.opacity <= 0) {
+                        waves.splice(i, 1);
+                        continue;
+                    }
+
+                    // Draw outer cyan wave
+                    ctx.beginPath();
+                    ctx.arc(w.x, w.y, w.radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(103, 232, 249, ${w.opacity})`; 
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Draw inner purple wave for a layered audio pulse effect
+                    ctx.beginPath();
+                    ctx.arc(w.x, w.y, Math.max(0, w.radius - 15), 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(196, 146, 255, ${w.opacity * 0.6})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+                requestAnimationFrame(drawWaves);
+            }
+            drawWaves();
         });
     </script>
 </body>
