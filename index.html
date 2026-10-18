@@ -32,6 +32,7 @@
             font-family: var(--font-sans);
             line-height: 1.6;
             overflow-x: hidden;
+            /* Hide default cursor to use custom one */
             cursor: none; 
         }
 
@@ -124,6 +125,7 @@
         .logo-img {
             height: 48px;
             width: auto;
+            /* This filter blends the logo's white background into the dark theme */
             mix-blend-mode: screen; 
             filter: drop-shadow(0 0 10px rgba(103, 232, 249, 0.3));
             transition: filter 0.3s ease;
@@ -253,7 +255,7 @@
         }
 
         /* =========================================
-           Features Section with Smooth Mouse Tracking
+           Features Section
            ========================================= */
         .features {
             padding: 120px 48px;
@@ -290,7 +292,7 @@
             overflow: hidden;
         }
         
-        /* لایه نورانی که با ماوس حرکت میکند و با انیمیشن ظاهر میشود */
+        /* Glowing layer that follows the mouse and fades in smoothly */
         .card::before {
             content: '';
             position: absolute;
@@ -303,17 +305,17 @@
                 rgba(103, 232, 249, 0.12),
                 transparent 40%
             );
-            opacity: 0; /* مخفی در حالت عادی */
-            transition: opacity 0.4s ease; /* انیمیشن نرم برای ظهور و محو شدن */
-            pointer-events: none; /* جلوگیری از مسدود کردن کلیک */
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.4s ease; /* Smooth fade transition */
+            pointer-events: none; /* Prevents blocking clicks */
             z-index: 0;
         }
 
         .card:hover::before {
-            opacity: 1; /* نمایش در زمان هاور */
+            opacity: 1; /* Show on hover */
         }
 
-        /* قرار دادن محتوای کارت روی لایه نورانی */
+        /* Place card content above the glowing layer */
         .card > * {
             position: relative;
             z-index: 1;
@@ -475,6 +477,7 @@
     <!-- Navigation -->
     <nav>
         <a href="#" class="logo-container">
+            <!-- Make sure images/logo.png exists in your repository -->
             <img src="images/logo.png" alt="Pejvak DSP Logo" class="logo-img">
         </a>
         
@@ -499,6 +502,7 @@
         </div>
 
         <div class="hero-image-wrapper fade-up">
+            <!-- Make sure images/screenshot.png exists in your repository -->
             <img src="images/screenshot.png" alt="PEJVAK RVB Interface" class="hero-image" onerror="this.src='https://via.placeholder.com/1100x600/131a30/67e8f9?text=Upload+images/screenshot.png'">
         </div>
     </section>
@@ -644,19 +648,22 @@
             window.addEventListener('mousemove', (e) => {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
+                // The dot follows the cursor immediately
                 cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
             });
 
+            // Animation loop for the trailing effect of the outer cursor
             function animateCursor() {
                 let distX = mouseX - outlineX;
                 let distY = mouseY - outlineY;
-                outlineX += distX * 0.15;
+                outlineX += distX * 0.15; // Lower value = slower/smoother trailing
                 outlineY += distY * 0.15;
                 cursorOutline.style.transform = `translate(${outlineX}px, ${outlineY}px) translate(-50%, -50%)`;
                 requestAnimationFrame(animateCursor);
             }
             animateCursor();
 
+            // Enlarge cursor on links, buttons, and cards
             const hoverables = document.querySelectorAll('a, button, .card');
             hoverables.forEach(el => {
                 el.addEventListener('mouseenter', () => cursorOutline.classList.add('hovering'));
@@ -670,7 +677,7 @@
                     const rect = card.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
-                    // ارسال مختصات ماوس به CSS به صورت متغیر
+                    // Update CSS variables with mouse coordinates
                     card.style.setProperty('--mouse-x', `${x}px`);
                     card.style.setProperty('--mouse-y', `${y}px`);
                 });
