@@ -594,7 +594,8 @@
         </div>
 
         <div class="hero-image-wrapper fade-up">
-            <img src="images/screenshot.png" alt="PEJVAK RVB Interface" class="hero-image" onerror="this.src='https://via.placeholder.com/1100x600/131a30/67e8f9?text=Upload+images/screenshot.png'">
+            <!-- Updated to .jpg format -->
+            <img src="images/screenshot.jpg" alt="PEJVAK RVB Interface" class="hero-image" onerror="this.src='https://via.placeholder.com/1100x600/131a30/67e8f9?text=Upload+images/screenshot.jpg'">
         </div>
     </section>
 
@@ -793,7 +794,7 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
-            // --- 5. Audio Wave Effect on Mouse Move ---
+            // --- 5. Subtle Audio Wave Effect on Mouse Move ---
             const canvas = document.getElementById('waveCanvas');
             const ctx = canvas.getContext('2d');
             let waves = [];
@@ -808,13 +809,13 @@
 
             window.addEventListener('mousemove', (e) => {
                 const now = Date.now();
-                // Throttle wave creation for performance (every 60ms)
-                if (now - lastMouseMove > 60) {
+                // Throttle wave creation more (every 100ms) for a softer effect
+                if (now - lastMouseMove > 100) {
                     waves.push({
                         x: e.clientX,
                         y: e.clientY,
                         radius: 0,
-                        opacity: 1
+                        opacity: 0.4 // Start with a lower opacity for subtlety
                     });
                     lastMouseMove = now;
                 }
@@ -824,25 +825,25 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 for (let i = waves.length - 1; i >= 0; i--) {
                     let w = waves[i];
-                    w.radius += 2; 
-                    w.opacity -= 0.025; 
+                    w.radius += 1.5; // Expand slower
+                    w.opacity -= 0.012; // Fade out slower
 
                     if (w.opacity <= 0) {
                         waves.splice(i, 1);
                         continue;
                     }
 
-                    // Draw outer cyan wave
+                    // Outer cyan wave (thinner and fainter)
                     ctx.beginPath();
                     ctx.arc(w.x, w.y, w.radius, 0, Math.PI * 2);
-                    ctx.strokeStyle = `rgba(103, 232, 249, ${w.opacity})`; 
-                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = `rgba(103, 232, 249, ${w.opacity * 0.5})`; 
+                    ctx.lineWidth = 1; // Thinner line
                     ctx.stroke();
 
-                    // Draw inner purple wave for a layered audio pulse effect
+                    // Inner purple wave (even fainter)
                     ctx.beginPath();
-                    ctx.arc(w.x, w.y, Math.max(0, w.radius - 15), 0, Math.PI * 2);
-                    ctx.strokeStyle = `rgba(196, 146, 255, ${w.opacity * 0.6})`;
+                    ctx.arc(w.x, w.y, Math.max(0, w.radius - 10), 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(196, 146, 255, ${w.opacity * 0.2})`;
                     ctx.lineWidth = 1;
                     ctx.stroke();
                 }
