@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pejvak DSP — Premium Audio Plugins</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0f1e;
+            --bg-card: rgba(22, 30, 54, 0.6);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #e6eaf4;
+            --text-dim: #8d97b0;
+            --accent-cyan: #67e8f9;
+            --accent-purple: #c492ff;
+            --font-sans: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            overflow-x: hidden;
+            cursor: none; 
+        }
+
+        a { color: var(--accent-cyan); text-decoration: none; transition: opacity 0.2s; }
+        a:hover { opacity: 0.8; }
+
+        /* =========================================
+           CUSTOM ANIMATED CURSOR
+           ========================================= */
+        .cursor-dot, .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(103, 232, 249, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        .cursor-outline.hovering {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(103, 232, 249, 0.1);
+            border-color: var(--accent-cyan);
+        }
+
+        /* Background Gradients */
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .glow-1 {
+            position: absolute;
+            top: -20%;
+            left: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(103, 232, 249, 0.08) 0%, transparent 60%);
+            border-radius: 50%;
+        }
+        .glow-2 {
+            position: absolute;
+            bottom: -20%;
+            right: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(196, 146, 255, 0.08) 0%, transparent 60%);
+            border-radius: 50%;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 15, 30, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .logo-img {
+            height: 48px;
+            width: auto;
+            mix-blend-mode: screen; 
+            filter: drop-shadow(0 0 10px rgba(103, 232, 249, 0.3));
+            transition: filter 0.3s ease;
+        }
+        .logo-container:hover .logo-img {
+            filter: drop-shadow(0 0 20px rgba(103, 232, 249, 0.6));
+        }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            margin-left: 32px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--accent-cyan); }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 140px 20px 60px;
+        }
+        .hero-badge {
+            background: rgba(103, 232, 249, 0.1);
+            border: 1px solid rgba(103, 232, 249, 0.2);
+            color: var(--accent-cyan);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: 24px;
+        }
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--text-dim);
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 64px;
+        }
+        .btn {
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .btn-primary {
+            background: var(--accent-cyan);
+            color: var(--bg);
+        }
+        .btn-primary:hover {
+            background: #88f0ff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(103, 232, 249, 0.2);
+            opacity: 1;
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-dim);
+            opacity: 1;
+        }
+
+        /* Plugin Screenshot Area */
+        .hero-image-wrapper {
+            width: 100%;
+            max-width: 1100px;
+            position: relative;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            padding: 10px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 40px rgba(103, 232, 249, 0.05);
+        }
+        .hero-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+        }
+
+        /* About Section */
+        .about {
+            padding: 100px 48px;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .about h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+        }
+        .about p {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        /* =========================================
+           Features Section with Smooth Mouse Tracking
+           ========================================= */
+        .features {
+            padding: 120px 48px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            text-align: center;
+        }
+        .section-subtitle {
+            color: var(--text-dim);
+            margin-bottom: 64px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* لایه نورانی که با ماوس حرکت میکند و با انیمیشن ظاهر میشود */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(
+                600px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+                rgba(103, 232, 249, 0.12),
+                transparent 40%
+            );
+            opacity: 0; /* مخفی در حالت عادی */
+            transition: opacity 0.4s ease; /* انیمیشن نرم برای ظهور و محو شدن */
+            pointer-events: none; /* جلوگیری از مسدود کردن کلیک */
+            z-index: 0;
+        }
+
+        .card:hover::before {
+            opacity: 1; /* نمایش در زمان هاور */
+        }
+
+        /* قرار دادن محتوای کارت روی لایه نورانی */
+        .card > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* Download Section */
+        .download {
+            padding: 100px 48px;
+            text-align: center;
+            background: linear-gradient(to bottom, transparent, rgba(10, 15, 30, 1));
+        }
+        .download h2 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            font-weight: 800;
+        }
+        .download p {
+            color: var(--text-dim);
+            margin-bottom: 40px;
+        }
+        .download-grid {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .download-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .download-btn:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(103, 232, 249, 0.05);
+            opacity: 1;
+        }
+        .download-btn span { font-size: 1.5rem; }
+
+        /* =========================================
+           Credits & License Section
+           ========================================= */
+        .credits {
+            padding: 80px 48px;
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--border);
+            border-radius: 24px 24px 0 0;
+        }
+        .credits h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        .credits h3 {
+            font-size: 1.2rem;
+            color: var(--accent-cyan);
+            margin-top: 32px;
+            margin-bottom: 12px;
+            font-family: var(--font-mono);
+        }
+        .credits p, .credits ul {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+        .credits ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .credits li {
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+        .credits strong {
+            color: var(--text-main);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 32px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            background: var(--bg);
+        }
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            margin-left: 24px;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--accent-cyan); }
+
+        /* Animations */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { cursor: auto; }
+            .cursor-dot, .cursor-outline { display: none; }
+            nav { padding: 20px 24px; }
+            .nav-links { display: none; }
+            .hero-actions { flex-direction: column; width: 100%; padding: 0 20px; }
+            .btn { width: 100%; text-align: center; }
+            .features, .download, .about, .credits { padding: 60px 24px; }
+            footer { flex-direction: column; gap: 24px; text-align: center; }
+            .footer-links a { margin: 0 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Custom Cursor Elements -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Background Glows -->
+    <div class="bg-glow">
+        <div class="glow-1"></div>
+        <div class="glow-2"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo-container">
+            <img src="images/logo.png" alt="Pejvak DSP Logo" class="logo-img">
+        </a>
+        
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#features">Features</a>
+            <a href="#download">Download</a>
+            <a href="#credits">Credits</a>
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-badge fade-up">PEJVAK RVB v1.0.0 is out now</div>
+        <h1 class="fade-up">Hybrid Algorithmic <br><span>Reverb.</span></h1>
+        <p class="fade-up">Experience the perfect blend of the legendary CloudSeed engine and a modern Filtered Feedback Delay Network. Pure Rust, zero-allocation DSP.</p>
+        
+        <div class="hero-actions fade-up">
+            <a href="#download" class="btn btn-primary">Download Now</a>
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB" target="_blank" class="btn btn-secondary">View on GitHub</a>
+        </div>
+
+        <div class="hero-image-wrapper fade-up">
+            <img src="images/screenshot.png" alt="PEJVAK RVB Interface" class="hero-image" onerror="this.src='https://via.placeholder.com/1100x600/131a30/67e8f9?text=Upload+images/screenshot.png'">
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <h2 class="fade-up">Engineering Excellence</h2>
+        <p class="fade-up">Pejvak DSP was founded with a singular vision: to build audio software that respects both the art of sound design and the science of computer engineering. Every plugin we release is written from scratch in <strong>pure Rust</strong>.</p>
+        <p class="fade-up">We don't rely on heavy, outdated frameworks. By utilizing <strong>f64 precision DSP</strong> and ensuring <strong>zero memory allocation</strong> on the audio thread, we guarantee ultimate stability in your DAW, no matter how complex your session gets.</p>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h2 class="section-title fade-up">Everything you need.</h2>
+        <p class="section-subtitle fade-up">Professional tools for modern sound design.</p>
+        
+        <div class="grid">
+            <div class="card fade-up">
+                <span class="card-icon">🌌</span>
+                <h3>Dual Engine Architecture</h3>
+                <p>Switch seamlessly between a bit-exact CloudSeed port and a modern FFDN engine for completely different reverb characters.</p>
+            </div>
+            <div class="card fade-up">
+                <span class="card-icon">🎨</span>
+                <h3>6-Layer Texture Rack</h3>
+                <p>Shape your sound with Shimmer, Mist, Drift, Crystal, Scatter, and Bloom. Reorder them via drag-and-drop.</p>
+            </div>
+            <div class="card fade-up">
+                <span class="card-icon">🔮</span>
+                <h3>ILLUSION Granular Cloud</h3>
+                <p>A beautiful granular engine with pitched overtones, featuring 8 anti-click techniques for pristine audio quality.</p>
+            </div>
+            <div class="card fade-up">
+                <span class="card-icon">↩️</span>
+                <h3>Smart Undo / Redo</h3>
+                <p>50-step history with parameter-name tooltips. Never lose your perfect settings again.</p>
+            </div>
+            <div class="card fade-up">
+                <span class="card-icon">🎛️</span>
+                <h3>96 Factory Presets</h3>
+                <p>From tight drum rooms to infinite ambient spaces, across 16 curated categories.</p>
+            </div>
+            <div class="card fade-up">
+                <span class="card-icon">⚡</span>
+                <h3>Pure Rust DSP</h3>
+                <p>Zero allocation on the audio thread and f64 precision for ultimate stability and performance.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="download">
+        <h2 class="fade-up">Ready to shape your space?</h2>
+        <p class="fade-up">Download the latest version of PEJVAK RVB for your platform.</p>
+        
+        <div class="download-grid fade-up">
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB/releases/latest" class="download-btn" target="_blank">
+                <span>🪟</span> Download for Windows
+            </a>
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB/releases/latest" class="download-btn" target="_blank">
+                <span>🍎</span> Download for macOS
+            </a>
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB/releases/latest" class="download-btn" target="_blank">
+                <span>🐧</span> Download for Linux
+            </a>
+        </div>
+    </section>
+
+    <!-- Credits & License Section -->
+    <section id="credits" class="credits">
+        <h2 class="fade-up">Credits & License</h2>
+        
+        <div class="fade-up">
+            <h3>Author & Publisher</h3>
+            <p>
+                <strong>Pejvak DSP</strong> — an independent audio plugin studio focused on bit-exact DSP and modern interfaces.<br>
+                Designed & developed by <strong>Amin Yousefinejad</strong>.<br>
+                <a href="https://github.com/Pejvak-DSP" target="_blank">github.com/Pejvak-DSP</a>
+            </p>
+
+            <h3>Based on</h3>
+            <ul>
+                <li>
+                    <strong>CloudSeed</strong> by Valdemar Erlingsson — the original C++ reference. The CloudSeed engine is a faithful f64 port of the legacy-v1 branch and is bit-identical at the sample level.<br>
+                    <a href="https://github.com/ValdemarOrn/CloudSeed/tree/legacy-v1" target="_blank">github.com/ValdemarOrn/CloudSeed/tree/legacy-v1</a>
+                </li>
+                <li>
+                    <strong>CloudReverb</strong> by xunil-cloud — a JUCE-based fork of CloudSeed that served as a second reference during the port, in particular for cross-platform behaviour and the modern parameter layout.<br>
+                    <a href="https://github.com/xunil-cloud/CloudReverb" target="_blank">github.com/xunil-cloud/CloudReverb</a>
+                </li>
+                <li>
+                    <strong>FFDN theory:</strong> Fagerström et al., "Velvet-Noise Feedback Delay Network" (DAFx 2020); Schlecht & Habets, "Feedback Delay Networks" (IEEE TSP 2017).
+                </li>
+                <li>
+                    <strong>Velvet-noise diffusion:</strong> Välimäki et al. (IEEE/ACM TASLP 2017).
+                </li>
+                <li>
+                    <strong>Sine-shaper saturation:</strong> Zölzer, DAFX.
+                </li>
+                <li>
+                    <strong>Granular design:</strong> Curtis Roads, Microsound (MIT Press, 2001).
+                </li>
+            </ul>
+
+            <h3>License</h3>
+            <p>
+                PEJVAK RVB is released under the <strong>GNU General Public License v3.0 or later</strong>. The full text of the license is available at <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank">gnu.org/licenses/gpl-3.0.html</a>.
+            </p>
+            <p style="margin-top: 32px; text-align: center; color: var(--text-main); font-weight: 600;">
+                Pejvak DSP · Made with ♥ by Amin Yousefinejad
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div>© 2025 Pejvak DSP. All rights reserved.</div>
+        <div class="footer-links">
+            <a href="https://github.com/Pejvak-DSP" target="_blank">Organization</a>
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB" target="_blank">Repository</a>
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB/blob/main/LICENSE" target="_blank">GPL-3.0 License</a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // --- 1. Scroll Animations (Fade Up) ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.fade-up').forEach((el) => observer.observe(el));
+
+            // --- 2. Custom Animated Cursor ---
+            const cursorDot = document.querySelector('.cursor-dot');
+            const cursorOutline = document.querySelector('.cursor-outline');
+            let mouseX = 0, mouseY = 0;
+            let outlineX = 0, outlineY = 0;
+
+            window.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
+            });
+
+            function animateCursor() {
+                let distX = mouseX - outlineX;
+                let distY = mouseY - outlineY;
+                outlineX += distX * 0.15;
+                outlineY += distY * 0.15;
+                cursorOutline.style.transform = `translate(${outlineX}px, ${outlineY}px) translate(-50%, -50%)`;
+                requestAnimationFrame(animateCursor);
+            }
+            animateCursor();
+
+            const hoverables = document.querySelectorAll('a, button, .card');
+            hoverables.forEach(el => {
+                el.addEventListener('mouseenter', () => cursorOutline.classList.add('hovering'));
+                el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hovering'));
+            });
+
+            // --- 3. Card Mouse-Tracking Glow Effect ---
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mousemove', e => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    // ارسال مختصات ماوس به CSS به صورت متغیر
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
