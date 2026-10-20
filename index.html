@@ -10,18 +10,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <!-- Anti-flash: set theme BEFORE body renders -->
-<script>
-  (function() {
-    try {
-      const saved = localStorage.getItem('pejvak-theme');
-      // Default is always dark, regardless of OS preference.
-      // Users who toggle to light get their choice saved in localStorage.
-      document.documentElement.setAttribute('data-theme', saved || 'dark');
-    } catch (e) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-  })();
-</script>
+    <script>
+      (function() {
+        try {
+          const saved = localStorage.getItem('pejvak-theme');
+          // Default is always dark, regardless of OS preference.
+          // Users who toggle to light get their choice saved in localStorage.
+          document.documentElement.setAttribute('data-theme', saved || 'dark');
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
 
     <style>
         :root {
@@ -581,6 +581,13 @@
             color: var(--text-dim);
             font-size: 0.92rem;
             margin-bottom: 12px;
+        }
+
+        /* Wrapper for the open/close animation. JS sets height/opacity/overflow
+           inline during animation, then clears them. When not animating this
+           block flows naturally with auto height. */
+        .changelog-content {
+            will-change: height, opacity;
         }
 
         /* =========================================
@@ -1328,6 +1335,110 @@
                 ctx.stroke();
             }
             requestAnimationFrame(drawWaves);
+        })();
+
+        // ---- 8. Smooth open/close animation for changelog entries ----
+        (function setupChangelogAnimation() {
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            document.querySelectorAll('details.changelog-entry').forEach((details) => {
+                const summary = details.querySelector('summary');
+                if (!summary) return;
+
+                // Collect all children except the summary (the content)
+                const content = Array.from(details.children).filter(c => c !== summary);
+                if (content.length === 0) return;
+
+                // Wrap content in an animatable container
+                const wrapper = document.createElement('div');
+                wrapper.className = 'changelog-content';
+                content.forEach(c => wrapper.appendChild(c));
+                details.appendChild(wrapper);
+
+                let animating = false;
+
+                summary.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (animating) return;
+
+                    // Respect the user's motion preference
+                    if (prefersReducedMotion) {
+                        details.toggleAttribute('open');
+                        return;
+                    }
+
+                    animating = true;
+                    const isOpen = details.hasAttribute('open');
+
+                    if (isOpen) {
+                        // ---- CLOSING ----
+                        const startHeight = wrapper.scrollHeight;
+
+                        // Lock to the current height so the transition has a start value
+                        wrapper.style.transition = 'none';
+                        wrapper.style.height = startHeight + 'px';
+                        wrapper.style.opacity = '1';
+                        wrapper.style.overflow = 'hidden';
+                        void wrapper.offsetHeight; // Force reflow
+
+                        // Animate to collapsed
+                        wrapper.style.transition =
+                            'height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease';
+                        wrapper.style.height = '0px';
+                        wrapper.style.opacity = '0';
+
+                        const done = () => {
+                            wrapper.removeEventListener('transitionend', onTransitionEnd);
+                            clearTimeout(safety);
+                            details.removeAttribute('open');
+                            wrapper.style.cssText = '';
+                            animating = false;
+                        };
+                        const onTransitionEnd = (ev) => {
+                            if (ev.propertyName !== 'height') return;
+                            done();
+                        };
+                        wrapper.addEventListener('transitionend', onTransitionEnd);
+                        // Safety: transitionend can be skipped if the tab is
+                        // backgrounded mid-animation. Clear after 450 ms anyway.
+                        const safety = setTimeout(done, 450);
+                    } else {
+                        // ---- OPENING ----
+                        details.setAttribute('open', '');
+
+                        // Start collapsed
+                        wrapper.style.transition = 'none';
+                        wrapper.style.height = '0px';
+                        wrapper.style.opacity = '0';
+                        wrapper.style.overflow = 'hidden';
+                        void wrapper.offsetHeight; // Force reflow
+
+                        // Measure the natural height while collapsed
+                        // (scrollHeight reports the full content height even
+                        // when the wrapper is clipped at 0 px)
+                        const targetHeight = wrapper.scrollHeight;
+
+                        // Animate to full height
+                        wrapper.style.transition =
+                            'height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease';
+                        wrapper.style.height = targetHeight + 'px';
+                        wrapper.style.opacity = '1';
+
+                        const done = () => {
+                            wrapper.removeEventListener('transitionend', onTransitionEnd);
+                            clearTimeout(safety);
+                            wrapper.style.cssText = '';
+                            animating = false;
+                        };
+                        const onTransitionEnd = (ev) => {
+                            if (ev.propertyName !== 'height') return;
+                            done();
+                        };
+                        wrapper.addEventListener('transitionend', onTransitionEnd);
+                        const safety = setTimeout(done, 450);
+                    }
+                });
+            });
         })();
     });
     </script>
