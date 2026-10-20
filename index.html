@@ -4,32 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pejvak DSP — Premium Audio Plugins</title>
+    <meta name="description" content="PEJVAK RVB — a professional hybrid algorithmic reverb with dual engines. Pure Rust, bit-exact CloudSeed port, and modern FFDN.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Anti-flash: set theme BEFORE body renders -->
+    <script>
+      (function() {
+        try {
+          const saved = localStorage.getItem('pejvak-theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.setAttribute('data-theme', saved || (prefersDark ? 'dark' : 'light'));
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
+
     <style>
         :root {
+            /* Dark theme (default) */
             --bg: #0a0f1e;
             --bg-card: rgba(22, 30, 54, 0.6);
+            --bg-nav: rgba(10, 15, 30, 0.7);
             --border: rgba(255, 255, 255, 0.08);
             --text-main: #e6eaf4;
             --text-dim: #8d97b0;
+            --text-dimmer: #5e6882;
             --accent-cyan: #67e8f9;
             --accent-purple: #c492ff;
+            --accent-cyan-rgb: 103, 232, 249;
+            --accent-purple-rgb: 196, 146, 255;
+            --glow-1: rgba(103, 232, 249, 0.08);
+            --glow-2: rgba(196, 146, 255, 0.08);
+            --card-glow: rgba(103, 232, 249, 0.12);
+            --footer-bg: #0a0f1e;
+            --btn-primary-hover: #88f0ff;
+            --shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 40px rgba(103, 232, 249, 0.05);
             --font-sans: 'Inter', -apple-system, sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
 
-        /* Enable smooth scrolling for the entire page */
-        html {
-            scroll-behavior: smooth;
+        html[data-theme="light"] {
+            --bg: #f5f7fa;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --bg-nav: rgba(245, 247, 250, 0.85);
+            --border: rgba(0, 0, 0, 0.08);
+            --text-main: #1d2129;
+            --text-dim: #4d535f;
+            --text-dimmer: #777e8c;
+            --accent-cyan: #0c8599;
+            --accent-purple: #8b3df5;
+            --accent-cyan-rgb: 12, 133, 153;
+            --accent-purple-rgb: 139, 61, 245;
+            --glow-1: rgba(12, 133, 153, 0.06);
+            --glow-2: rgba(139, 61, 245, 0.05);
+            --card-glow: rgba(12, 133, 153, 0.08);
+            --footer-bg: #eef1f5;
+            --btn-primary-hover: #0a6d7d;
+            --shadow: 0 24px 64px rgba(0, 0, 0, 0.12), 0 0 40px rgba(12, 133, 153, 0.06);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        html { scroll-behavior: smooth; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: var(--bg);
@@ -37,7 +76,8 @@
             font-family: var(--font-sans);
             line-height: 1.6;
             overflow-x: hidden;
-            cursor: none; 
+            cursor: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         a { color: var(--accent-cyan); text-decoration: none; transition: opacity 0.2s; }
@@ -52,8 +92,8 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -1; 
-            pointer-events: none; 
+            z-index: -1;
+            pointer-events: none;
         }
 
         /* =========================================
@@ -77,13 +117,13 @@
         .cursor-outline {
             width: 40px;
             height: 40px;
-            border: 1px solid rgba(103, 232, 249, 0.5);
+            border: 1px solid rgba(var(--accent-cyan-rgb), 0.5);
             transition: width 0.2s, height 0.2s, background-color 0.2s;
         }
         .cursor-outline.hovering {
             width: 60px;
             height: 60px;
-            background-color: rgba(103, 232, 249, 0.1);
+            background-color: rgba(var(--accent-cyan-rgb), 0.1);
             border-color: var(--accent-cyan);
         }
 
@@ -96,7 +136,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -2; 
+            z-index: -2;
             overflow: hidden;
             pointer-events: none;
         }
@@ -106,7 +146,7 @@
             left: -10%;
             width: 60vw;
             height: 60vw;
-            background: radial-gradient(circle, rgba(103, 232, 249, 0.08) 0%, transparent 60%);
+            background: radial-gradient(circle, var(--glow-1) 0%, transparent 60%);
             border-radius: 50%;
         }
         .glow-2 {
@@ -115,64 +155,123 @@
             right: -10%;
             width: 50vw;
             height: 50vw;
-            background: radial-gradient(circle, rgba(196, 146, 255, 0.08) 0%, transparent 60%);
+            background: radial-gradient(circle, var(--glow-2) 0%, transparent 60%);
             border-radius: 50%;
         }
 
         /* =========================================
-           Navigation & Scroll Effects
+           Navigation
            ========================================= */
         nav {
             position: fixed;
             top: 0;
             width: 100%;
-            padding: 32px 48px; 
+            padding: 32px 48px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: transparent; 
+            background: transparent;
             border-bottom: 1px solid transparent;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             z-index: 100;
         }
-
         nav.scrolled {
-            padding: 16px 48px; 
-            background: rgba(10, 15, 30, 0.7);
+            padding: 16px 48px;
+            background: var(--bg-nav);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
         }
-        
+
         .logo-container {
             display: flex;
             align-items: center;
             gap: 12px;
             text-decoration: none;
         }
-
         .logo-img {
-            height: 85px; 
+            height: 85px;
             width: auto;
-            mix-blend-mode: screen; 
+            mix-blend-mode: screen;
             filter: drop-shadow(0 0 15px rgba(103, 232, 249, 0.4));
             transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
-
         nav.scrolled .logo-img {
             height: 48px;
             filter: drop-shadow(0 0 8px rgba(103, 232, 249, 0.2));
         }
+        html[data-theme="light"] .logo-img {
+            mix-blend-mode: normal;
+            filter: invert(1) drop-shadow(0 0 15px rgba(12, 133, 153, 0.3));
+        }
+        html[data-theme="light"] nav.scrolled .logo-img {
+            filter: invert(1) drop-shadow(0 0 8px rgba(12, 133, 153, 0.2));
+        }
 
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         .nav-links a {
             color: var(--text-dim);
             text-decoration: none;
-            margin-left: 32px;
+            padding: 8px 16px;
             font-size: 0.9rem;
             font-weight: 600;
             transition: color 0.2s;
+            border-radius: 6px;
         }
-        .nav-links a:hover { color: var(--accent-cyan); }
+        .nav-links a:hover { color: var(--accent-cyan); background: rgba(var(--accent-cyan-rgb), 0.05); }
+
+        .nav-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+            margin: 0 8px;
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            cursor: none;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            background: rgba(var(--accent-cyan-rgb), 0.05);
+        }
+
+        /* Mobile hamburger */
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+        .nav-toggle span {
+            width: 24px;
+            height: 2px;
+            background: var(--text-main);
+            border-radius: 2px;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        .nav-toggle.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+        .nav-toggle.open span:nth-child(2) { opacity: 0; }
+        .nav-toggle.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
         /* =========================================
            Back to Top Button
@@ -184,19 +283,20 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: rgba(22, 30, 54, 0.6);
+            background: var(--bg-card);
             border: 1px solid var(--accent-cyan);
             color: var(--accent-cyan);
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: none; 
+            cursor: none;
             opacity: 0;
             visibility: hidden;
             transform: translateY(20px);
             transition: all 0.3s ease;
             z-index: 99;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
         #backToTop.visible {
             opacity: 1;
@@ -206,23 +306,16 @@
         #backToTop:hover {
             background: var(--accent-cyan);
             color: var(--bg);
-            box-shadow: 0 0 20px rgba(103, 232, 249, 0.4);
+            box-shadow: 0 0 20px rgba(var(--accent-cyan-rgb), 0.4);
         }
-        #backToTop svg {
-            width: 24px;
-            height: 24px;
-            transition: transform 0.2s;
-        }
-        #backToTop:hover svg {
-            transform: translateY(-2px);
-        }
+        #backToTop svg { width: 24px; height: 24px; transition: transform 0.2s; }
+        #backToTop:hover svg { transform: translateY(-2px); }
 
-        /* Add scroll margin to sections to offset the fixed header */
-        section {
-            scroll-margin-top: 100px; 
-        }
+        section { scroll-margin-top: 100px; }
 
-        /* Hero Section */
+        /* =========================================
+           Hero
+           ========================================= */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -230,11 +323,11 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 180px 20px 60px; 
+            padding: 180px 20px 60px;
         }
         .hero-badge {
-            background: rgba(103, 232, 249, 0.1);
-            border: 1px solid rgba(103, 232, 249, 0.2);
+            background: rgba(var(--accent-cyan-rgb), 0.1);
+            border: 1px solid rgba(var(--accent-cyan-rgb), 0.2);
             color: var(--accent-cyan);
             padding: 6px 16px;
             border-radius: 100px;
@@ -244,7 +337,7 @@
             letter-spacing: 1px;
         }
         .hero h1 {
-            font-size: clamp(3rem, 8vw, 6rem);
+            font-size: clamp(2.5rem, 8vw, 6rem);
             font-weight: 800;
             line-height: 1.1;
             letter-spacing: -2px;
@@ -253,6 +346,7 @@
         .hero h1 span {
             background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .hero p {
@@ -265,6 +359,8 @@
             display: flex;
             gap: 16px;
             margin-bottom: 64px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .btn {
             padding: 14px 28px;
@@ -273,15 +369,16 @@
             text-decoration: none;
             transition: all 0.2s;
             font-size: 1rem;
+            display: inline-block;
         }
         .btn-primary {
             background: var(--accent-cyan);
             color: var(--bg);
         }
         .btn-primary:hover {
-            background: #88f0ff;
+            background: var(--btn-primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(103, 232, 249, 0.2);
+            box-shadow: 0 8px 24px rgba(var(--accent-cyan-rgb), 0.2);
             opacity: 1;
         }
         .btn-secondary {
@@ -290,12 +387,11 @@
             border: 1px solid var(--border);
         }
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(var(--accent-cyan-rgb), 0.05);
             border-color: var(--text-dim);
             opacity: 1;
         }
 
-        /* Plugin Screenshot Area */
         .hero-image-wrapper {
             width: 100%;
             max-width: 1100px;
@@ -304,7 +400,8 @@
             border: 1px solid var(--border);
             background: var(--bg-card);
             padding: 10px;
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 40px rgba(103, 232, 249, 0.05);
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.3s ease, background 0.3s ease;
         }
         .hero-image {
             width: 100%;
@@ -313,35 +410,20 @@
             display: block;
         }
 
-        /* About Section */
-        .about {
-            padding: 100px 48px;
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        .about h2 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 24px;
-        }
-        .about p {
-            font-size: 1.1rem;
-            color: var(--text-dim);
-            margin-bottom: 20px;
-            line-height: 1.8;
-        }
-
         /* =========================================
-           Features Section
+           Shared Section Styles
            ========================================= */
-        .features {
-            padding: 120px 48px;
-            max-width: 1200px;
-            margin: 0 auto;
+        .about, .features, .changelog, .download, .credits {
+            padding: 100px 48px;
         }
+        .about { max-width: 800px; margin: 0 auto; text-align: center; }
+        .features { max-width: 1200px; margin: 0 auto; }
+        .changelog { max-width: 900px; margin: 0 auto; }
+        .download { text-align: center; background: linear-gradient(to bottom, transparent, var(--footer-bg)); }
+        .credits { max-width: 1000px; margin: 0 auto; }
+
         .section-title {
-            font-size: 2.5rem;
+            font-size: clamp(2rem, 5vw, 2.5rem);
             font-weight: 800;
             margin-bottom: 16px;
             letter-spacing: -1px;
@@ -353,12 +435,20 @@
             font-size: 1.1rem;
             text-align: center;
         }
+
+        /* About */
+        .about h2 { font-size: clamp(2rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: 24px; }
+        .about p { font-size: 1.1rem; color: var(--text-dim); margin-bottom: 20px; line-height: 1.8; }
+        .about strong { color: var(--text-main); }
+
+        /* =========================================
+           Features Grid
+           ========================================= */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 24px;
         }
-        
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -368,66 +458,135 @@
             -webkit-backdrop-filter: blur(20px);
             position: relative;
             overflow: hidden;
+            transition: border-color 0.3s;
         }
-        
-        /* Glowing layer that follows the mouse and fades in smoothly */
         .card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background-image: radial-gradient(
                 600px circle at var(--mouse-x, 0) var(--mouse-y, 0),
-                rgba(103, 232, 249, 0.12),
+                var(--card-glow),
                 transparent 40%
             );
-            opacity: 0; 
-            transition: opacity 0.4s ease; 
-            pointer-events: none; 
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
             z-index: 0;
         }
+        .card:hover::before { opacity: 1; }
+        .card:hover { border-color: rgba(var(--accent-cyan-rgb), 0.3); }
+        .card > * { position: relative; z-index: 1; }
+        .card-icon { font-size: 2rem; margin-bottom: 16px; display: block; }
+        .card h3 { font-size: 1.25rem; margin-bottom: 12px; font-weight: 600; }
+        .card p { color: var(--text-dim); font-size: 0.95rem; }
 
-        .card:hover::before {
-            opacity: 1; 
+        /* =========================================
+           Changelog Section
+           ========================================= */
+        .changelog-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
-
-        .card > * {
+        .changelog-entry {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .changelog-entry:hover {
+            border-color: rgba(var(--accent-cyan-rgb), 0.3);
+        }
+        .changelog-entry summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            user-select: none;
             position: relative;
-            z-index: 1;
         }
-        
-        .card-icon {
-            font-size: 2rem;
-            margin-bottom: 16px;
-            display: block;
-        }
-        .card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-        .card p {
+        .changelog-entry summary::-webkit-details-marker { display: none; }
+        .changelog-entry summary::after {
+            content: '+';
+            margin-left: auto;
+            font-size: 1.5rem;
             color: var(--text-dim);
-            font-size: 0.95rem;
+            transition: transform 0.2s;
+            font-family: var(--font-mono);
+        }
+        .changelog-entry[open] summary::after {
+            content: '−';
+            color: var(--accent-cyan);
+        }
+        .changelog-version {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-size: 1rem;
+        }
+        .changelog-date {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+        }
+        .changelog-badge {
+            background: rgba(var(--accent-cyan-rgb), 0.15);
+            color: var(--accent-cyan);
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .changelog-body {
+            padding: 0 24px 24px;
+            border-top: 1px solid var(--border);
+        }
+        .changelog-body h4 {
+            color: var(--accent-purple);
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            margin-bottom: 12px;
+        }
+        .changelog-body h4:first-child { margin-top: 16px; }
+        .changelog-body ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .changelog-body li {
+            color: var(--text-dim);
+            font-size: 0.92rem;
+            padding: 6px 0 6px 20px;
+            position: relative;
+            line-height: 1.6;
+        }
+        .changelog-body li::before {
+            content: '›';
+            position: absolute;
+            left: 4px;
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+        .changelog-body li strong { color: var(--text-main); }
+        .changelog-body p {
+            color: var(--text-dim);
+            font-size: 0.92rem;
+            margin-bottom: 12px;
         }
 
-        /* Download Section */
-        .download {
-            padding: 100px 48px;
-            text-align: center;
-            background: linear-gradient(to bottom, transparent, rgba(10, 15, 30, 1));
-        }
-        .download h2 {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
-            font-weight: 800;
-        }
-        .download p {
-            color: var(--text-dim);
-            margin-bottom: 40px;
-        }
+        /* =========================================
+           Download Section
+           ========================================= */
+        .download h2 { font-size: clamp(2rem, 5vw, 2.5rem); margin-bottom: 16px; font-weight: 800; }
+        .download > p { color: var(--text-dim); margin-bottom: 40px; }
         .download-grid {
             display: flex;
             justify-content: center;
@@ -446,75 +605,188 @@
             text-decoration: none;
             font-weight: 600;
             transition: all 0.2s;
+            min-width: 200px;
+            justify-content: center;
         }
         .download-btn:hover {
             border-color: var(--accent-cyan);
-            background: rgba(103, 232, 249, 0.05);
+            background: rgba(var(--accent-cyan-rgb), 0.05);
+            transform: translateY(-2px);
             opacity: 1;
         }
         .download-btn span { font-size: 1.5rem; }
 
         /* =========================================
-           Credits & License Section
+           Credits Section — redesigned
            ========================================= */
-        .credits {
-            padding: 80px 48px;
-            max-width: 900px;
-            margin: 0 auto;
-            background: rgba(0, 0, 0, 0.2);
-            border-top: 1px solid var(--border);
-            border-radius: 24px 24px 0 0;
-        }
-        .credits h2 {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 32px;
+        .credits-intro {
             text-align: center;
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            max-width: 700px;
+            margin: 0 auto 48px;
+            line-height: 1.7;
         }
-        .credits h3 {
-            font-size: 1.2rem;
+        .credits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+        .credit-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: border-color 0.2s, transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .credit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            opacity: 0.6;
+        }
+        .credit-card:hover {
+            border-color: rgba(var(--accent-cyan-rgb), 0.3);
+            transform: translateY(-2px);
+        }
+        .credit-card h3 {
+            font-size: 0.75rem;
             color: var(--accent-cyan);
-            margin-top: 32px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
             margin-bottom: 12px;
             font-family: var(--font-mono);
         }
-        .credits p, .credits ul {
-            color: var(--text-dim);
-            font-size: 0.95rem;
-            margin-bottom: 16px;
-        }
-        .credits ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        .credits li {
-            margin-bottom: 16px;
-            line-height: 1.7;
-        }
-        .credits strong {
+        .credit-card .credit-name {
+            font-size: 1.15rem;
+            font-weight: 600;
             color: var(--text-main);
+            margin-bottom: 8px;
         }
-
-        /* Footer */
-        footer {
-            border-top: 1px solid var(--border);
-            padding: 32px 48px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .credit-card .credit-desc {
             color: var(--text-dim);
             font-size: 0.9rem;
-            background: var(--bg);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .credit-card a {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            word-break: break-all;
+        }
+
+        .refs-block {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+        .refs-block h3 {
+            font-size: 0.9rem;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+            font-family: var(--font-mono);
+        }
+        .refs-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .refs-list li {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.6;
+        }
+        .refs-list li::before {
+            content: '◆';
+            position: absolute;
+            left: 0;
+            color: var(--accent-cyan);
+            font-size: 0.6rem;
+            top: 0.4em;
+        }
+        .refs-list strong { color: var(--text-main); }
+
+        .license-card {
+            background: linear-gradient(135deg, rgba(var(--accent-cyan-rgb), 0.05), rgba(var(--accent-purple-rgb), 0.05));
+            border: 1px solid rgba(var(--accent-cyan-rgb), 0.2);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+        }
+        .license-card h3 {
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            font-family: var(--font-mono);
+        }
+        .license-card p {
+            color: var(--text-main);
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .credits-signature {
+            text-align: center;
+            color: var(--text-main);
+            font-weight: 600;
+            margin-top: 48px;
+            font-size: 1rem;
+        }
+        .credits-signature span { color: var(--accent-cyan); }
+
+        /* =========================================
+           Footer — centered copyright
+           ========================================= */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 40px 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            background: var(--footer-bg);
+            text-align: center;
+        }
+        .footer-copyright {
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .footer-links a {
             color: var(--text-dim);
             text-decoration: none;
-            margin-left: 24px;
+            font-size: 0.9rem;
             transition: color 0.2s;
         }
         .footer-links a:hover { color: var(--accent-cyan); }
 
-        /* Animations */
+        /* =========================================
+           Animations
+           ========================================= */
         .fade-up {
             opacity: 0;
             transform: translateY(30px);
@@ -525,42 +797,115 @@
             transform: translateY(0);
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        /* =========================================
+           Responsive — Mobile-first improvements
+           ========================================= */
+        @media (pointer: coarse) {
             body { cursor: auto; }
             .cursor-dot, .cursor-outline { display: none; }
-            #backToTop { cursor: pointer; bottom: 20px; right: 20px; }
-            nav { padding: 20px 24px; background: rgba(10, 15, 30, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
-            nav.scrolled { padding: 16px 24px; }
-            .nav-links { display: none; }
-            .logo-img { height: 50px; }
+            #backToTop, .theme-toggle, button { cursor: pointer; }
+        }
+
+        @media (max-width: 900px) {
+            nav {
+                padding: 16px 20px;
+                background: var(--bg-nav);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-bottom: 1px solid var(--border);
+                flex-wrap: wrap;
+            }
+            nav.scrolled { padding: 12px 20px; }
+            .logo-img { height: 48px; }
             nav.scrolled .logo-img { height: 40px; }
-            .hero { padding-top: 120px; }
-            .hero-actions { flex-direction: column; width: 100%; padding: 0 20px; }
+
+            .nav-toggle { display: flex; }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--bg-nav);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-bottom: 1px solid var(--border);
+                padding: 12px 20px 20px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            }
+            .nav-links.open { display: flex; }
+            .nav-links a {
+                margin: 0;
+                padding: 14px 16px;
+                font-size: 1rem;
+                border-radius: 8px;
+            }
+            .nav-divider { display: none; }
+            .theme-toggle {
+                order: -1;
+                margin-right: auto;
+                margin-left: 8px;
+            }
+
+            .hero { padding: 130px 20px 40px; min-height: auto; }
+            .hero h1 { letter-spacing: -1px; }
+            .hero-actions { flex-direction: column; width: 100%; max-width: 320px; }
             .btn { width: 100%; text-align: center; }
-            .features, .download, .about, .credits { padding: 60px 24px; }
-            footer { flex-direction: column; gap: 24px; text-align: center; }
-            .footer-links a { margin: 0 12px; }
-            section { scroll-margin-top: 70px; }
+
+            .about, .features, .changelog, .download, .credits { padding: 60px 20px; }
+
+            .grid { grid-template-columns: 1fr; }
+            .download-grid { flex-direction: column; align-items: stretch; }
+            .download-btn { width: 100%; }
+
+            footer { padding: 32px 20px; gap: 16px; }
+            .footer-links { gap: 16px; }
+
+            #backToTop { bottom: 20px; right: 20px; width: 44px; height: 44px; }
+            section { scroll-margin-top: 80px; }
+
+            .changelog-entry summary { padding: 16px 18px; gap: 12px; flex-wrap: wrap; }
+            .changelog-body { padding: 0 18px 18px; }
+            .credits-grid { grid-template-columns: 1fr; }
+            .refs-list { grid-template-columns: 1fr; }
+            .credit-card, .refs-block, .license-card { padding: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero-badge { font-size: 0.7rem; padding: 4px 12px; }
+            .logo-img { height: 40px; }
+            nav.scrolled .logo-img { height: 34px; }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Canvas for Sound Wave Effect -->
+    <!-- Background canvas + glow -->
     <canvas id="waveCanvas"></canvas>
-
-    <!-- Custom Cursor Elements -->
-    <div class="cursor-dot"></div>
-    <div class="cursor-outline"></div>
-
-    <!-- Background Gradients -->
     <div class="bg-glow">
         <div class="glow-1"></div>
         <div class="glow-2"></div>
     </div>
 
-    <!-- Back to Top Button -->
+    <!-- Custom cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Back to Top -->
     <button id="backToTop" title="Go to top" aria-label="Go to top">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="18 15 12 9 6 15"></polyline>
@@ -569,48 +914,62 @@
 
     <!-- Navigation -->
     <nav id="navbar">
-        <a href="#" class="logo-container">
+        <a href="#" class="logo-container" aria-label="Pejvak DSP home">
             <img src="images/logo.png" alt="Pejvak DSP Logo" class="logo-img">
         </a>
-        
-        <div class="nav-links">
+
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+
+        <div class="nav-links" id="navLinks">
             <a href="#about">About</a>
             <a href="#features">Features</a>
+            <a href="#changelog">Changelog</a>
             <a href="#download">Download</a>
             <a href="#credits">Credits</a>
-            <a href="https://github.com/Pejvak-DSP/PejvakRVB" target="_blank">GitHub</a>
+            <div class="nav-divider" aria-hidden="true"></div>
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB" target="_blank" rel="noopener">GitHub</a>
+            <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle light / dark theme">
+                <span id="themeIcon">☀</span>
+            </button>
         </div>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- Hero -->
     <section class="hero">
-        <div class="hero-badge fade-up">PEJVAK RVB v1.0.0 is out now</div>
+        <div class="hero-badge fade-up">PEJVAK RVB v1.0.1 is out now</div>
         <h1 class="fade-up">Hybrid Algorithmic <br><span>Reverb.</span></h1>
         <p class="fade-up">Experience the perfect blend of the legendary CloudSeed engine and a modern Filtered Feedback Delay Network. Pure Rust, zero-allocation DSP.</p>
-        
+
         <div class="hero-actions fade-up">
             <a href="#download" class="btn btn-primary">Download Now</a>
-            <a href="https://github.com/Pejvak-DSP/PejvakRVB" target="_blank" class="btn btn-secondary">View on GitHub</a>
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB" target="_blank" rel="noopener" class="btn btn-secondary">View on GitHub</a>
         </div>
 
         <div class="hero-image-wrapper fade-up">
-            <!-- Updated to .jpg format -->
-            <img src="images/screenshot.jpg" alt="PEJVAK RVB Interface" class="hero-image" onerror="this.src='https://via.placeholder.com/1100x600/131a30/67e8f9?text=Upload+images/screenshot.jpg'">
+            <img
+                src="images/screenshot.jpg"
+                data-dark="images/screenshot.jpg"
+                data-light="images/screenshot-light.jpg"
+                alt="PEJVAK RVB Interface"
+                class="hero-image"
+                id="heroImage">
         </div>
     </section>
 
-    <!-- About Section -->
+    <!-- About -->
     <section id="about" class="about">
         <h2 class="fade-up">Engineering Excellence</h2>
         <p class="fade-up">Pejvak DSP was founded with a singular vision: to build audio software that respects both the art of sound design and the science of computer engineering. Every plugin we release is written from scratch in <strong>pure Rust</strong>.</p>
         <p class="fade-up">We don't rely on heavy, outdated frameworks. By utilizing <strong>f64 precision DSP</strong> and ensuring <strong>zero memory allocation</strong> on the audio thread, we guarantee ultimate stability in your DAW, no matter how complex your session gets.</p>
     </section>
 
-    <!-- Features Section -->
+    <!-- Features -->
     <section id="features" class="features">
         <h2 class="section-title fade-up">Everything you need.</h2>
         <p class="section-subtitle fade-up">Professional tools for modern sound design.</p>
-        
+
         <div class="grid">
             <div class="card fade-up">
                 <span class="card-icon">🌌</span>
@@ -634,7 +993,7 @@
             </div>
             <div class="card fade-up">
                 <span class="card-icon">🎛️</span>
-                <h3>96 Factory Presets</h3>
+                <h3>100 Factory Presets</h3>
                 <p>From tight drum rooms to infinite ambient spaces, across 16 curated categories.</p>
             </div>
             <div class="card fade-up">
@@ -645,212 +1004,331 @@
         </div>
     </section>
 
-    <!-- Download Section -->
+    <!-- Changelog -->
+    <section id="changelog" class="changelog">
+        <h2 class="section-title fade-up">What's New</h2>
+        <p class="section-subtitle fade-up">Recent releases and improvements. Click a version to expand.</p>
+
+        <div class="changelog-list">
+            <details class="changelog-entry fade-up" open>
+                <summary>
+                    <span class="changelog-version">v1.0.1</span>
+                    <span class="changelog-date">October 20, 2026</span>
+                    <span class="changelog-badge">Latest</span>
+                </summary>
+                <div class="changelog-body">
+                    <h4>Fixed</h4>
+                    <ul>
+                        <li><strong>Zipper noise on manual fader movement</strong> — all output-stage gains now use per-sample one-pole smoothing (10 ms). Dragging a fader with the mouse no longer produces a staircase amplitude modulation.</li>
+                        <li><strong>Zipper noise on host automation</strong> — <code>SAMPLE_ACCURATE_AUTOMATION</code> disabled. Full host buffers are processed, so parameter values stay constant within a block and no step can occur.</li>
+                        <li><strong>FFDN delay buffer</strong> — now scales with sample rate (<code>500 ms × sample_rate</code>) instead of being hard-coded to <code>24000</code> samples.</li>
+                        <li><strong>FFDN feedback computed from clamped delay</strong> — prevents premature tail truncation when Size exceeds buffer capacity.</li>
+                        <li><strong>Velvet-Noise filter is now sample-rate aware</strong> — pulse count, LP coefficient, and RRS width all scale correctly at 44.1 / 48 / 88.2 / 96 kHz.</li>
+                        <li><strong>FFDN drive stability</strong> — <code>velvet_saturate</code> no longer applies a makeup gain. Restores unity small-signal gain and eliminates the FDN instability at high drive amounts.</li>
+                        <li><strong>FFDN Dynamics audibility</strong> — Attack now uses a square-root curve and blend-based attenuation. Ducking uses a dB-mapped exponential (up to −24 dB). Gate threshold widened to [−60, −10] dBFS with a squared fade.</li>
+                        <li><strong>Undo/redo no longer cuts the reverb tail</strong> — snapshots do not reset the DSP state, so undoing a parameter edit produces a smooth 10 ms ramp instead of an audible cut.</li>
+                        <li><strong>Canonical factory presets</strong> — <code>apply_factory_preset</code> resets texture extras, Velvet, FFDN card masters, and EQ master before applying. Every factory preset produces a complete, reproducible state.</li>
+                        <li><strong>Partial XML presets — CloudSeed</strong> — <code>ParsedPreset.cloudseed</code> is now <code>[Option&lt;f32&gt;; 49]</code>. Files with only FFDN, only Illusion, or a subset of CloudSeed load non-destructively.</li>
+                        <li><strong>Partial XML presets — Texture Rack</strong> — <code>ParsedPreset.texture</code> and <code>.enabled</code> are now <code>[Option&lt;f32&gt;; 32]</code> and <code>[Option&lt;bool&gt;; 6]</code>. XML without a <code>&lt;TextureRack&gt;</code> block no longer resets texture parameters.</li>
+                        <li><strong>Clippy-clean workspace</strong> — all 26 production lints and 23 UI/test lints resolved. <code>cargo clippy --workspace --all-targets -- -D warnings</code> completes with zero warnings.</li>
+                        <li><strong>Redundant permutation loop</strong> removed in <code>velvet_matrix.rs</code>. Output was already bit-identical.</li>
+                        <li><strong>CI race condition</strong> — the three per-platform workflows were unified into a single <code>release.yml</code>. Builds upload artifacts, and exactly one release is created after all platforms succeed.</li>
+                    </ul>
+
+                    <h4>Changed</h4>
+                    <ul>
+                        <li>User preset directory scan is throttled to 0.5 s (was per-frame).</li>
+                        <li><code>current_preset</code> is persisted across sessions via <code>#[persist]</code>.</li>
+                        <li>About modal now shows the official website link.</li>
+                        <li>Repository cleanup — repomix AI-context files removed from version control.</li>
+                    </ul>
+
+                    <h4>Notes</h4>
+                    <ul>
+                        <li>All 33 DSP tests pass. The suite covers every <code>*_is_bit_identical</code> and every <code>*_keeps_network_stable</code> check, so the audio path is verified to be unchanged.</li>
+                        <li>Factory presets with <code>attack &gt; 0</code> may sound stronger because the Dynamics stages are now much more audible at the same parameter values.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="changelog-entry fade-up">
+                <summary>
+                    <span class="changelog-version">v1.0.0</span>
+                    <span class="changelog-date">October 18, 2025</span>
+                </summary>
+                <div class="changelog-body">
+                    <p>Initial public release.</p>
+                    <ul>
+                        <li>CloudSeed legacy-v1 port (49 parameters, pure <code>f64</code>).</li>
+                        <li>FFDN engine with Householder and Velvet matrices.</li>
+                        <li>ILLUSION granular cloud with pitched overtones.</li>
+                        <li>Six-layer Texture Rack with reorderable signal chain.</li>
+                        <li>Velvet-Noise VFDN diffusion inside CloudSeed.</li>
+                        <li>100 factory presets across 16 categories.</li>
+                        <li>Undo / Redo with engine and page restore.</li>
+                        <li>TX kill switch, Smart Idle, Smart Sleep.</li>
+                    </ul>
+                </div>
+            </details>
+        </div>
+    </section>
+
+    <!-- Download -->
     <section id="download" class="download">
         <h2 class="fade-up">Ready to shape your space?</h2>
         <p class="fade-up">Download the latest version of PEJVAK RVB for your platform.</p>
-        
+
         <div class="download-grid fade-up">
-            <a href="https://github.com/Pejvak-DSP/PejvakRVB/releases/latest" class="download-btn" target="_blank">
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB/releases/latest" class="download-btn" target="_blank" rel="noopener">
                 <span>🪟</span> Download for Windows
             </a>
-            <a href="https://github.com/Pejvak-DSP/PejvakRVB/releases/latest" class="download-btn" target="_blank">
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB/releases/latest" class="download-btn" target="_blank" rel="noopener">
                 <span>🍎</span> Download for macOS
             </a>
-            <a href="https://github.com/Pejvak-DSP/PejvakRVB/releases/latest" class="download-btn" target="_blank">
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB/releases/latest" class="download-btn" target="_blank" rel="noopener">
                 <span>🐧</span> Download for Linux
             </a>
         </div>
     </section>
 
-    <!-- Credits & License Section -->
+    <!-- Credits -->
     <section id="credits" class="credits">
-        <h2 class="fade-up">Credits & License</h2>
-        
-        <div class="fade-up">
-            <h3>Author & Publisher</h3>
-            <p>
-                <strong>Pejvak DSP</strong> — an independent audio plugin studio focused on bit-exact DSP and modern interfaces.<br>
-                Designed & developed by <strong>Amin Yousefinejad</strong>.<br>
-                <a href="https://github.com/Pejvak-DSP" target="_blank">github.com/Pejvak-DSP</a>
-            </p>
+        <h2 class="section-title fade-up">Credits &amp; License</h2>
+        <p class="credits-intro fade-up">
+            PEJVAK RVB stands on the shoulders of giants. Huge thanks to the authors and researchers whose work made this plugin possible.
+        </p>
 
-            <h3>Based on</h3>
-            <ul>
-                <li>
-                    <strong>CloudSeed</strong> by Valdemar Erlingsson — the original C++ reference. The CloudSeed engine is a faithful f64 port of the legacy-v1 branch and is bit-identical at the sample level.<br>
-                    <a href="https://github.com/ValdemarOrn/CloudSeed/tree/legacy-v1" target="_blank">github.com/ValdemarOrn/CloudSeed/tree/legacy-v1</a>
-                </li>
-                <li>
-                    <strong>CloudReverb</strong> by xunil-cloud — a JUCE-based fork of CloudSeed that served as a second reference during the port, in particular for cross-platform behaviour and the modern parameter layout.<br>
-                    <a href="https://github.com/xunil-cloud/CloudReverb" target="_blank">github.com/xunil-cloud/CloudReverb</a>
-                </li>
-                <li>
-                    <strong>FFDN theory:</strong> Fagerström et al., "Velvet-Noise Feedback Delay Network" (DAFx 2020); Schlecht & Habets, "Feedback Delay Networks" (IEEE TSP 2017).
-                </li>
-                <li>
-                    <strong>Velvet-noise diffusion:</strong> Välimäki et al. (IEEE/ACM TASLP 2017).
-                </li>
-                <li>
-                    <strong>Sine-shaper saturation:</strong> Zölzer, DAFX.
-                </li>
-                <li>
-                    <strong>Granular design:</strong> Curtis Roads, Microsound (MIT Press, 2001).
-                </li>
-            </ul>
+        <div class="credits-grid fade-up">
+            <div class="credit-card">
+                <h3>Author &amp; Publisher</h3>
+                <div class="credit-name">Pejvak DSP</div>
+                <div class="credit-desc">
+                    Independent audio plugin studio focused on bit-exact DSP and modern interfaces.
+                    Designed &amp; developed by <strong style="color: var(--text-main);">Amin Yousefinejad</strong>.
+                </div>
+                <a href="https://github.com/Pejvak-DSP" target="_blank" rel="noopener">github.com/Pejvak-DSP</a>
+            </div>
 
-            <h3>License</h3>
-            <p>
-                PEJVAK RVB is released under the <strong>GNU General Public License v3.0 or later</strong>. The full text of the license is available at <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank">gnu.org/licenses/gpl-3.0.html</a>.
-            </p>
-            <p style="margin-top: 32px; text-align: center; color: var(--text-main); font-weight: 600;">
-                Pejvak DSP · Made with ♥ by Amin Yousefinejad
-            </p>
+            <div class="credit-card">
+                <h3>CloudSeed</h3>
+                <div class="credit-name">Valdemar Erlingsson</div>
+                <div class="credit-desc">
+                    The original C++ reference. The CloudSeed engine is a faithful <code>f64</code> port of the <code>legacy-v1</code> branch and is bit-identical at the sample level.
+                </div>
+                <a href="https://github.com/ValdemarOrn/CloudSeed/tree/legacy-v1" target="_blank" rel="noopener">github.com/ValdemarOrn/CloudSeed</a>
+            </div>
+
+            <div class="credit-card">
+                <h3>CloudReverb</h3>
+                <div class="credit-name">xunil-cloud</div>
+                <div class="credit-desc">
+                    A JUCE-based fork of CloudSeed that served as a second reference during the port, in particular for cross-platform behaviour and the modern parameter layout.
+                </div>
+                <a href="https://github.com/xunil-cloud/CloudReverb" target="_blank" rel="noopener">github.com/xunil-cloud/CloudReverb</a>
+            </div>
         </div>
+
+        <div class="refs-block fade-up">
+            <h3>Academic References</h3>
+            <ul class="refs-list">
+                <li><strong>FFDN theory</strong> — Fagerström et al., "Velvet-Noise Feedback Delay Network" (DAFx 2020); Schlecht &amp; Habets, "Feedback Delay Networks" (IEEE TSP 2017).</li>
+                <li><strong>Velvet-noise diffusion</strong> — Välimäki et al. (IEEE/ACM TASLP 2017).</li>
+                <li><strong>Sine-shaper saturation</strong> — Zölzer, <em>DAFX</em>.</li>
+                <li><strong>Granular design</strong> — Curtis Roads, <em>Microsound</em> (MIT Press, 2001).</li>
+            </ul>
+        </div>
+
+        <div class="license-card fade-up">
+            <h3>License</h3>
+            <p>Released under the <strong>GNU General Public License v3.0 or later</strong>.</p>
+            <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">gnu.org/licenses/gpl-3.0.html</a>
+        </div>
+
+        <p class="credits-signature fade-up">
+            Pejvak DSP · Made with <span>♥</span> by Amin Yousefinejad
+        </p>
     </section>
 
-    <!-- Footer -->
+    <!-- Footer — centered copyright -->
     <footer>
-        <div>© 2025 Pejvak DSP. All rights reserved.</div>
+        <div class="footer-copyright">© 2025–2026 Pejvak DSP. All rights reserved.</div>
         <div class="footer-links">
-            <a href="https://github.com/Pejvak-DSP" target="_blank">Organization</a>
-            <a href="https://github.com/Pejvak-DSP/PejvakRVB" target="_blank">Repository</a>
-            <a href="https://github.com/Pejvak-DSP/PejvakRVB/blob/main/LICENSE" target="_blank">GPL-3.0 License</a>
+            <a href="https://github.com/Pejvak-DSP" target="_blank" rel="noopener">Organization</a>
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB" target="_blank" rel="noopener">Repository</a>
+            <a href="https://github.com/Pejvak-DSP/PejvakRVB/blob/main/LICENSE" target="_blank" rel="noopener">GPL-3.0 License</a>
         </div>
     </footer>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // --- 1. Scroll Animations (Fade Up) ---
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.1 });
-            document.querySelectorAll('.fade-up').forEach((el) => observer.observe(el));
+    document.addEventListener("DOMContentLoaded", () => {
 
-            // --- 2. Custom Animated Cursor ---
-            const cursorDot = document.querySelector('.cursor-dot');
-            const cursorOutline = document.querySelector('.cursor-outline');
-            let mouseX = 0, mouseY = 0;
-            let outlineX = 0, outlineY = 0;
+        // ---- 1. Theme toggle ----
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const heroImage = document.getElementById('heroImage');
 
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            themeIcon.textContent = theme === 'light' ? '☾' : '☀';
+            // Swap hero screenshot
+            if (heroImage) {
+                heroImage.src = theme === 'light'
+                    ? heroImage.dataset.light
+                    : heroImage.dataset.dark;
+            }
+            // Refresh wave palette
+            updateWavePalette();
+            try { localStorage.setItem('pejvak-theme', theme); } catch (e) {}
+        }
+
+        // Initialize icon based on current theme
+        const initialTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        themeIcon.textContent = initialTheme === 'light' ? '☾' : '☀';
+        if (heroImage) {
+            heroImage.src = initialTheme === 'light'
+                ? heroImage.dataset.light
+                : heroImage.dataset.dark;
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            applyTheme(current === 'light' ? 'dark' : 'light');
+        });
+
+        // ---- 2. Mobile nav ----
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+            navToggle.classList.toggle('open');
+            navToggle.setAttribute('aria-expanded', navLinks.classList.contains('open'));
+        });
+
+        // Close mobile menu when a link is clicked
+        navLinks.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                navLinks.classList.remove('open');
+                navToggle.classList.remove('open');
+                navToggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        // ---- 3. Scroll Animations ----
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+        // ---- 4. Custom Cursor ----
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        let mouseX = 0, mouseY = 0, outlineX = 0, outlineY = 0;
+        const isTouch = window.matchMedia('(pointer: coarse)').matches;
+
+        if (!isTouch) {
             window.addEventListener('mousemove', (e) => {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
                 cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
             });
 
-            function animateCursor() {
-                let distX = mouseX - outlineX;
-                let distY = mouseY - outlineY;
-                outlineX += distX * 0.15;
-                outlineY += distY * 0.15;
+            (function animateCursor() {
+                const dx = mouseX - outlineX;
+                const dy = mouseY - outlineY;
+                outlineX += dx * 0.15;
+                outlineY += dy * 0.15;
                 cursorOutline.style.transform = `translate(${outlineX}px, ${outlineY}px) translate(-50%, -50%)`;
                 requestAnimationFrame(animateCursor);
-            }
-            animateCursor();
+            })();
 
-            const hoverables = document.querySelectorAll('a, button, .card');
-            hoverables.forEach(el => {
+            document.querySelectorAll('a, button, .card').forEach(el => {
                 el.addEventListener('mouseenter', () => cursorOutline.classList.add('hovering'));
                 el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hovering'));
             });
+        }
 
-            // --- 3. Card Mouse-Tracking Glow Effect ---
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                card.addEventListener('mousemove', e => {
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    card.style.setProperty('--mouse-x', `${x}px`);
-                    card.style.setProperty('--mouse-y', `${y}px`);
-                });
+        // ---- 5. Card hover glow ----
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
             });
+        });
 
-            // --- 4. Scroll Effects & Back to Top Button ---
-            const navbar = document.getElementById('navbar');
-            const backToTopBtn = document.getElementById('backToTop');
+        // ---- 6. Nav & Back-to-top on scroll ----
+        const navbar = document.getElementById('navbar');
+        const backToTopBtn = document.getElementById('backToTop');
 
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-                
-                // Show Back to Top button after scrolling down 500px
-                if (window.scrollY > 500) {
-                    backToTopBtn.classList.add('visible');
-                } else {
-                    backToTopBtn.classList.remove('visible');
-                }
-            });
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+            backToTopBtn.classList.toggle('visible', window.scrollY > 500);
+        });
 
-            backToTopBtn.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
 
-            // --- 5. Subtle Audio Wave Effect on Mouse Move ---
-            const canvas = document.getElementById('waveCanvas');
-            const ctx = canvas.getContext('2d');
-            let waves = [];
-            let lastMouseMove = 0;
+        // ---- 7. Wave canvas ----
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        let waves = [];
+        let lastMouseMove = 0;
+        let waveCyan = '103, 232, 249';
+        let wavePurple = '196, 146, 255';
 
-            function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-            window.addEventListener('resize', resizeCanvas);
-            resizeCanvas();
+        function updateWavePalette() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            waveCyan = isLight ? '12, 133, 153' : '103, 232, 249';
+            wavePurple = isLight ? '139, 61, 245' : '196, 146, 255';
+        }
+        updateWavePalette();
 
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        if (!isTouch) {
             window.addEventListener('mousemove', (e) => {
                 const now = Date.now();
-                // Throttle wave creation more (every 100ms) for a softer effect
                 if (now - lastMouseMove > 100) {
-                    waves.push({
-                        x: e.clientX,
-                        y: e.clientY,
-                        radius: 0,
-                        opacity: 0.4 // Start with a lower opacity for subtlety
-                    });
+                    waves.push({ x: e.clientX, y: e.clientY, radius: 0, opacity: 0.4 });
                     lastMouseMove = now;
                 }
             });
+        }
 
-            function drawWaves() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for (let i = waves.length - 1; i >= 0; i--) {
-                    let w = waves[i];
-                    w.radius += 1.5; // Expand slower
-                    w.opacity -= 0.012; // Fade out slower
+        (function drawWaves() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = waves.length - 1; i >= 0; i--) {
+                const w = waves[i];
+                w.radius += 1.5;
+                w.opacity -= 0.012;
+                if (w.opacity <= 0) { waves.splice(i, 1); continue; }
 
-                    if (w.opacity <= 0) {
-                        waves.splice(i, 1);
-                        continue;
-                    }
+                ctx.beginPath();
+                ctx.arc(w.x, w.y, w.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(${waveCyan}, ${w.opacity * 0.5})`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
 
-                    // Outer cyan wave (thinner and fainter)
-                    ctx.beginPath();
-                    ctx.arc(w.x, w.y, w.radius, 0, Math.PI * 2);
-                    ctx.strokeStyle = `rgba(103, 232, 249, ${w.opacity * 0.5})`; 
-                    ctx.lineWidth = 1; // Thinner line
-                    ctx.stroke();
-
-                    // Inner purple wave (even fainter)
-                    ctx.beginPath();
-                    ctx.arc(w.x, w.y, Math.max(0, w.radius - 10), 0, Math.PI * 2);
-                    ctx.strokeStyle = `rgba(196, 146, 255, ${w.opacity * 0.2})`;
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }
-                requestAnimationFrame(drawWaves);
+                ctx.beginPath();
+                ctx.arc(w.x, w.y, Math.max(0, w.radius - 10), 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(${wavePurple}, ${w.opacity * 0.2})`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
             }
-            drawWaves();
-        });
+            requestAnimationFrame(drawWaves);
+        })();
+    });
     </script>
 </body>
 </html>
