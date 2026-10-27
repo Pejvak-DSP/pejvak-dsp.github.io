@@ -728,6 +728,163 @@
         }
         .download-btn span { font-size: 1.5rem; }
 
+        .download-note {
+            margin-top: 32px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.05em;
+        }
+
+        .download-note a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(var(--accent-cyan-rgb), 0.4);
+            transition: border-color 0.2s;
+        }
+
+        .download-note a:hover {
+            border-bottom-color: var(--accent-cyan);
+            opacity: 1;
+        }
+
+        /* =========================================
+           System Requirements Section
+           ========================================= */
+        .requirements {
+            padding: 100px 48px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .req-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .req-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: border-color 0.3s, transform 0.2s;
+        }
+
+        .req-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border);
+            transition: opacity 0.3s;
+        }
+
+        .req-card--accent::before {
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            opacity: 0.85;
+        }
+
+        .req-card:hover {
+            border-color: rgba(var(--accent-cyan-rgb), 0.3);
+            transform: translateY(-2px);
+        }
+
+        .req-card--accent:hover {
+            border-color: rgba(var(--accent-cyan-rgb), 0.5);
+        }
+
+        .req-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .req-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .req-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
+        }
+
+        .req-card--accent .req-header h3 {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .req-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .req-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.92rem;
+        }
+
+        .req-list li:first-child {
+            padding-top: 0;
+        }
+
+        .req-list li:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .req-key {
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-weight: 600;
+            flex-shrink: 0;
+            min-width: 68px;
+        }
+
+        .req-val {
+            color: var(--text-main);
+            text-align: right;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .req-note {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-align: center;
+            max-width: 760px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .req-note strong {
+            color: var(--text-main);
+        }
+
         /* =========================================
            Credits Section — redesigned
            ========================================= */
@@ -975,11 +1132,21 @@
             .hero-actions { flex-direction: column; width: 100%; max-width: 320px; }
             .btn { width: 100%; text-align: center; }
 
-            .about, .features, .changelog, .download, .credits { padding: 60px 20px; }
+            .about, .features, .changelog, .download, .credits, .requirements { padding: 60px 20px; }
 
             .grid { grid-template-columns: 1fr; }
             .download-grid { flex-direction: column; align-items: stretch; }
             .download-btn { width: 100%; }
+
+            .req-grid { grid-template-columns: 1fr; gap: 16px; }
+            .req-card { padding: 24px; }
+            .req-list li {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .req-key { min-width: 0; }
+            .req-val { text-align: left; }
 
             footer { padding: 32px 20px; gap: 16px; }
             .footer-links { gap: 16px; }
@@ -1046,6 +1213,7 @@
             <a href="#features">Features</a>
             <a href="#changelog">Changelog</a>
             <a href="#download">Download</a>
+            <a href="#requirements">Requirements</a>
             <a href="#credits">Credits</a>
             <div class="nav-divider" aria-hidden="true"></div>
             <a href="https://github.com/Pejvak-DSP/PejvakRVB" target="_blank" rel="noopener">GitHub</a>
@@ -1060,7 +1228,8 @@
         <div class="promo-header">
             <div class="promo-badge">Cinematic preview</div>
             <h2>See PEJVAK RVB in motion.</h2>
-                   </div>
+            <p>A 60-second tour of both reverb engines, the Texture Rack, and ILLUSION — rendered in real-time.</p>
+        </div>
         <div class="promo-frame">
             <iframe
                 src="promo.html"
@@ -1193,7 +1362,7 @@
             <details class="changelog-entry fade-up">
                 <summary>
                     <span class="changelog-version">v1.0.0</span>
-                    <span class="changelog-date">October 18, 2026</span>
+                    <span class="changelog-date">October 18, 2025</span>
                 </summary>
                 <div class="changelog-body">
                     <p>Initial public release.</p>
@@ -1228,6 +1397,83 @@
                 <span>🐧</span> Download for Linux
             </a>
         </div>
+
+        <p class="download-note fade-up">
+            Not sure if your system is compatible? <a href="#requirements">Check the requirements ↓</a>
+        </p>
+    </section>
+
+    <!-- System Requirements -->
+    <section id="requirements" class="requirements">
+        <h2 class="section-title fade-up">System Requirements</h2>
+        <p class="section-subtitle fade-up">PEJVAK RVB runs on any modern 64-bit system.</p>
+
+        <div class="req-grid">
+            <!-- Minimum -->
+            <div class="req-card fade-up">
+                <div class="req-header">
+                    <span class="req-icon">⚙️</span>
+                    <h3>Minimum</h3>
+                </div>
+                <ul class="req-list">
+                    <li>
+                        <span class="req-key">OS</span>
+                        <span class="req-val">Windows 10 · macOS 10.15 · Linux (glibc 2.31+)</span>
+                    </li>
+                    <li>
+                        <span class="req-key">CPU</span>
+                        <span class="req-val">x86_64 (SSE2) or Apple Silicon</span>
+                    </li>
+                    <li>
+                        <span class="req-key">RAM</span>
+                        <span class="req-val">4 GB</span>
+                    </li>
+                    <li>
+                        <span class="req-key">Disk</span>
+                        <span class="req-val">50 MB free space</span>
+                    </li>
+                    <li>
+                        <span class="req-key">Format</span>
+                        <span class="req-val">VST3 or CLAP host (64-bit)</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Recommended -->
+            <div class="req-card req-card--accent fade-up">
+                <div class="req-header">
+                    <span class="req-icon">✨</span>
+                    <h3>Recommended</h3>
+                </div>
+                <ul class="req-list">
+                    <li>
+                        <span class="req-key">OS</span>
+                        <span class="req-val">Windows 11 · macOS 12+ · Modern Linux</span>
+                    </li>
+                    <li>
+                        <span class="req-key">CPU</span>
+                        <span class="req-val">Apple Silicon or x86_64 with AVX2</span>
+                    </li>
+                    <li>
+                        <span class="req-key">RAM</span>
+                        <span class="req-val">8 GB or more</span>
+                    </li>
+                    <li>
+                        <span class="req-key">Disk</span>
+                        <span class="req-val">100 MB free (presets + manual cache)</span>
+                    </li>
+                    <li>
+                        <span class="req-key">Format</span>
+                        <span class="req-val">VST3 (64-bit) or CLAP</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <p class="req-note fade-up">
+            <strong>Note:</strong> Both VST3 and CLAP formats ship as native universal binaries on macOS (Intel + Apple Silicon).
+            AVX2 is used automatically when available for the SIMD fast path, but is never required.
+        </p>
     </section>
 
     <!-- Credits -->
