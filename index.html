@@ -139,16 +139,23 @@
 
         /* ---- Lagging outline ring ----
            Base: 40px, cyan, thin solid border.
-           On hover: color shifts to purple, and the ring pulses between
-           22px (scale 0.55) and 40px (scale 1.0). The largest visible size
-           during the pulse is exactly the normal 40px — the ring never
-           grows beyond its resting size, it only shrinks and returns. */
+
+           On hover:
+             * color shifts to purple
+             * the ring shrinks and grows back — pure width/height
+               animation, so the ring is guaranteed to stay centred
+               exactly on the cursor. No rotation, no scale, no
+               transform trickery that could make it look like it
+               drifts or pulses off-centre.
+
+           The largest visible size during the animation is exactly
+           the normal 40px — the ring never grows beyond its resting
+           size, it only shrinks and returns. */
         .cursor-outline {
             width: 40px;
             height: 40px;
             border: 1px solid rgba(var(--accent-cyan-rgb), 0.5);
             z-index: 9999;
-            transform-origin: center center;
             transition: border-color 0.3s ease, background-color 0.3s ease;
         }
 
@@ -159,8 +166,14 @@
         }
 
         @keyframes cursorRingPulse {
-            0%, 100% { scale: 1;    }   /* 40px = normal = largest */
-            50%      { scale: 0.55; }   /* 22px = smallest        */
+            0%, 100% {
+                width: 40px;
+                height: 40px;
+            }
+            50% {
+                width: 22px;
+                height: 22px;
+            }
         }
 
         /* =========================================
@@ -1584,8 +1597,12 @@
             })();
 
             // Hover: color shifts to purple on both dot and ring, and the
-            // ring pulses between 40px (normal) and 22px. Nothing spins,
-            // nothing moves — only color and scale.
+            // ring's width/height animates so it shrinks and grows back.
+            // Because the ring uses `transform: translate(-50%, -50%)` for
+            // centering, the browser re-resolves that -50% against the new
+            // width/height on every frame, so the ring's centre stays
+            // pinned exactly on the cursor. No movement, no rotation, no
+            // scale — only size change.
             document.querySelectorAll('a, button, summary, .card').forEach(el => {
                 el.addEventListener('mouseenter', () => {
                     cursorOutline.classList.add('hovering');
