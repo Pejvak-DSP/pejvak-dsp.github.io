@@ -123,7 +123,10 @@
             pointer-events: none;
         }
 
-        /* ---- Small tracking dot ---- */
+        /* ---- Small tracking dot ----
+           On hover it "winks" — a soft double-beat heartbeat pulse
+           (lub-dub). The dot never leaves its position; only its scale
+           pulses, which the eye reads as a gentle alive wink. */
         .cursor-dot {
             width: 8px;
             height: 8px;
@@ -131,24 +134,36 @@
             box-shadow: 0 0 10px var(--accent-cyan);
             z-index: 10000;
             transition:
-                width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
                 background-color 0.3s ease,
                 box-shadow 0.3s ease;
+            transform-origin: center center;
         }
 
-        /* Dot on hover — shifts to accent purple so the two cursors
-           (dot + spinning ring) never look like the same material. */
         .cursor-dot.hovering {
-            width: 10px;
-            height: 10px;
             background-color: var(--accent-purple);
             box-shadow:
-                0 0 16px var(--accent-purple),
-                0 0 28px rgba(var(--accent-purple-rgb), 0.5);
+                0 0 14px var(--accent-purple),
+                0 0 24px rgba(var(--accent-purple-rgb), 0.5);
+            animation: cursorDotWink 1.3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
 
-        /* ---- Lagging outline ring ---- */
+        /* Lub-dub heartbeat. Two quick pulses, then a pause, then repeat.
+           The peaks reach scale 1.7 (dot appears ~14px) and 1.4 (dot
+           appears ~11px) — enough to be clearly "alive" but never jumpy. */
+        @keyframes cursorDotWink {
+            0%   { scale: 1;    }
+            12%  { scale: 1.7;  }
+            25%  { scale: 1;    }
+            37%  { scale: 1.4;  }
+            50%  { scale: 1;    }
+            100% { scale: 1;    }
+        }
+
+        /* ---- Lagging outline ring ----
+           On hover it grows slightly, shifts to accent purple, and does
+           a gentle breath (scale 1 → 1.08 → 1) once every 2.6 s. It never
+           spins, never rotates, never moves — only its scale and glow
+           breathe, giving the pair a calm "alive" feel. */
         .cursor-outline {
             width: 40px;
             height: 40px;
@@ -159,68 +174,26 @@
                 height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
                 background-color 0.35s ease,
                 border-color 0.35s ease,
-                border-width 0.35s ease,
-                rotate 0.4s ease;
-        }
-
-        /* The ripple ring inside the outline. Only visible during hover. */
-        .cursor-outline::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            border: 1.5px solid var(--accent-cyan);
-            opacity: 0;
-            pointer-events: none;
+                border-width 0.35s ease;
             transform-origin: center center;
         }
 
-        /* ---- Hover state — the "special" animation ----
-           • the ring grows and becomes a spinning dashed circle
-             (like a record groove or a targeting reticle)
-           • a soft glow pulses in and out
-           • a secondary ring ripples outward every ~2 s
-        */
         .cursor-outline.hovering {
-            width: 60px;
-            height: 60px;
-            border: 2px dashed var(--accent-cyan);
-            background-color: rgba(var(--accent-cyan-rgb), 0.06);
-            animation:
-                cursorSpin 6s linear infinite,
-                cursorPulse 1.8s ease-in-out infinite;
+            width: 56px;
+            height: 56px;
+            border: 1.5px solid var(--accent-purple);
+            background-color: rgba(var(--accent-purple-rgb), 0.05);
+            animation: cursorOutlineBreath 2.6s ease-in-out infinite;
         }
 
-        .cursor-outline.hovering::before {
-            animation: cursorRipple 2.2s ease-out infinite;
-        }
-
-        @keyframes cursorSpin {
-            from { rotate: 0deg; }
-            to   { rotate: 360deg; }
-        }
-
-        @keyframes cursorPulse {
+        @keyframes cursorOutlineBreath {
             0%, 100% {
-                box-shadow:
-                    0 0 0 0 rgba(var(--accent-cyan-rgb), 0),
-                    0 0 18px 2px rgba(var(--accent-cyan-rgb), 0.28);
+                scale: 1;
+                box-shadow: 0 0 0 0 rgba(var(--accent-purple-rgb), 0);
             }
             50% {
-                box-shadow:
-                    0 0 0 5px rgba(var(--accent-cyan-rgb), 0.08),
-                    0 0 32px 6px rgba(var(--accent-cyan-rgb), 0.55);
-            }
-        }
-
-        @keyframes cursorRipple {
-            0% {
-                transform: scale(0.9);
-                opacity: 0.65;
-            }
-            100% {
-                transform: scale(2.4);
-                opacity: 0;
+                scale: 1.08;
+                box-shadow: 0 0 0 3px rgba(var(--accent-purple-rgb), 0.18);
             }
         }
 
@@ -345,8 +318,6 @@
             display: block;
             flex-shrink: 0;
         }
-        /* The label is hidden on desktop, shown only in the mobile drawer
-           where an icon alone in a full-width row looks out of place. */
         .nav-github-label { display: none; }
 
         .nav-divider {
@@ -487,7 +458,6 @@
         .promo-frame {
             position: relative;
             width: 100%;
-            /* 16:9 content + ~130px for controls + hint inside the promo */
             padding-top: calc(56.25% + 130px);
             border-radius: 16px;
             overflow: hidden;
@@ -811,9 +781,6 @@
             margin-bottom: 12px;
         }
 
-        /* Wrapper for the open/close animation. JS sets height/opacity/overflow
-           inline during animation, then clears them. When not animating this
-           block flows naturally with auto height. */
         .changelog-content {
             will-change: height, opacity;
         }
@@ -1245,9 +1212,6 @@
                 border-radius: 8px;
             }
 
-            /* In the mobile drawer, the icon-only GitHub link becomes a
-               full-width row with the icon and label side by side, so it
-               matches the visual rhythm of the other links. */
             .nav-links .nav-github {
                 width: 100%;
                 height: auto;
@@ -1318,19 +1282,16 @@
             nav.scrolled .logo-img { height: 34px; }
         }
 
-        /* Reduced motion */
+        /* Reduced motion — turn off the heartbeat pulse and breathing,
+           but keep the size + color change so hover state stays distinct. */
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
                 transition-duration: 0.01ms !important;
             }
-            /* Turn off the continuous cursor spin / pulse / ripple.
-               Keep the size + color change, which is motion-safe. */
+            .cursor-dot.hovering,
             .cursor-outline.hovering {
-                animation: none !important;
-            }
-            .cursor-outline.hovering::before {
                 animation: none !important;
             }
         }
@@ -1578,7 +1539,6 @@
         <p class="section-subtitle fade-up">PEJVAK RVB runs on any modern 64-bit system.</p>
 
         <div class="req-grid">
-            <!-- Minimum -->
             <div class="req-card fade-up">
                 <div class="req-header">
                     <span class="req-icon">⚙️</span>
@@ -1608,7 +1568,6 @@
                 </ul>
             </div>
 
-            <!-- Recommended -->
             <div class="req-card req-card--accent fade-up">
                 <div class="req-header">
                     <span class="req-icon">✨</span>
@@ -1724,18 +1683,15 @@
         function applyTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             themeIcon.textContent = theme === 'light' ? '☾' : '☀';
-            // Swap hero screenshot
             if (heroImage) {
                 heroImage.src = theme === 'light'
                     ? heroImage.dataset.light
                     : heroImage.dataset.dark;
             }
-            // Refresh wave palette
             updateWavePalette();
             try { localStorage.setItem('pejvak-theme', theme); } catch (e) {}
         }
 
-        // Initialize icon based on current theme
         const initialTheme = document.documentElement.getAttribute('data-theme') || 'dark';
         themeIcon.textContent = initialTheme === 'light' ? '☾' : '☀';
         if (heroImage) {
@@ -1759,7 +1715,6 @@
             navToggle.setAttribute('aria-expanded', navLinks.classList.contains('open'));
         });
 
-        // Close mobile menu when a link is clicked
         navLinks.querySelectorAll('a').forEach(a => {
             a.addEventListener('click', () => {
                 navLinks.classList.remove('open');
@@ -1800,17 +1755,9 @@
                 requestAnimationFrame(animateCursor);
             })();
 
-            // Add the .hovering class to BOTH the dot and the outline on
-            // every clickable / interactive element. The CSS then animates
-            // the outline into a spinning dashed ring with a glow and a
-            // radial ripple, and shifts the dot to accent purple.
-            //
-            // The selector includes:
-            //   * a, button      — every link and button
-            //   * summary        — expandable changelog entries
-            //   * .card          — feature cards (their inner hover glow
-            //                      makes them feel interactive even
-            //                      though they don't navigate)
+            // Hover state — dot and outline both switch to their "wink"
+            // animation (heartbeat + breathe). No spinning, no rotating,
+            // nothing moves position-wise; only scale pulses in place.
             document.querySelectorAll('a, button, summary, .card').forEach(el => {
                 el.addEventListener('mouseenter', () => {
                     cursorOutline.classList.add('hovering');
@@ -1908,11 +1855,9 @@
                 const summary = details.querySelector('summary');
                 if (!summary) return;
 
-                // Collect all children except the summary (the content)
                 const content = Array.from(details.children).filter(c => c !== summary);
                 if (content.length === 0) return;
 
-                // Wrap content in an animatable container
                 const wrapper = document.createElement('div');
                 wrapper.className = 'changelog-content';
                 content.forEach(c => wrapper.appendChild(c));
@@ -1924,7 +1869,6 @@
                     e.preventDefault();
                     if (animating) return;
 
-                    // Respect the user's motion preference
                     if (prefersReducedMotion) {
                         details.toggleAttribute('open');
                         return;
@@ -1934,17 +1878,14 @@
                     const isOpen = details.hasAttribute('open');
 
                     if (isOpen) {
-                        // ---- CLOSING ----
                         const startHeight = wrapper.scrollHeight;
 
-                        // Lock to the current height so the transition has a start value
                         wrapper.style.transition = 'none';
                         wrapper.style.height = startHeight + 'px';
                         wrapper.style.opacity = '1';
                         wrapper.style.overflow = 'hidden';
-                        void wrapper.offsetHeight; // Force reflow
+                        void wrapper.offsetHeight;
 
-                        // Animate to collapsed
                         wrapper.style.transition =
                             'height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease';
                         wrapper.style.height = '0px';
@@ -1962,26 +1903,18 @@
                             done();
                         };
                         wrapper.addEventListener('transitionend', onTransitionEnd);
-                        // Safety: transitionend can be skipped if the tab is
-                        // backgrounded mid-animation. Clear after 450 ms anyway.
                         const safety = setTimeout(done, 450);
                     } else {
-                        // ---- OPENING ----
                         details.setAttribute('open', '');
 
-                        // Start collapsed
                         wrapper.style.transition = 'none';
                         wrapper.style.height = '0px';
                         wrapper.style.opacity = '0';
                         wrapper.style.overflow = 'hidden';
-                        void wrapper.offsetHeight; // Force reflow
+                        void wrapper.offsetHeight;
 
-                        // Measure the natural height while collapsed
-                        // (scrollHeight reports the full content height even
-                        // when the wrapper is clipped at 0 px)
                         const targetHeight = wrapper.scrollHeight;
 
-                        // Animate to full height
                         wrapper.style.transition =
                             'height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease';
                         wrapper.style.height = targetHeight + 'px';
