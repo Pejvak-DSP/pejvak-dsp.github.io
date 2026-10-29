@@ -86,6 +86,15 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* Force the OS cursor to stay hidden on every interactive element.
+           Without this, browsers apply their own `cursor: pointer` from the
+           user-agent stylesheet to <a> and <button>, so the system hand icon
+           would appear on top of our custom cursor. */
+        a, button, summary, input, textarea, select,
+        [role="button"], [role="link"], [onclick] {
+            cursor: none;
+        }
+
         a { color: var(--accent-cyan); text-decoration: none; transition: opacity 0.2s; }
         a:hover { opacity: 0.8; }
 
@@ -111,26 +120,108 @@
             left: 0;
             transform: translate(-50%, -50%);
             border-radius: 50%;
-            z-index: 9999;
             pointer-events: none;
         }
+
+        /* ---- Small tracking dot ---- */
         .cursor-dot {
             width: 8px;
             height: 8px;
             background-color: var(--accent-cyan);
             box-shadow: 0 0 10px var(--accent-cyan);
+            z-index: 10000;
+            transition:
+                width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                background-color 0.3s ease,
+                box-shadow 0.3s ease;
         }
+
+        /* Dot on hover — shifts to accent purple so the two cursors
+           (dot + spinning ring) never look like the same material. */
+        .cursor-dot.hovering {
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent-purple);
+            box-shadow:
+                0 0 16px var(--accent-purple),
+                0 0 28px rgba(var(--accent-purple-rgb), 0.5);
+        }
+
+        /* ---- Lagging outline ring ---- */
         .cursor-outline {
             width: 40px;
             height: 40px;
             border: 1px solid rgba(var(--accent-cyan-rgb), 0.5);
-            transition: width 0.2s, height 0.2s, background-color 0.2s;
+            z-index: 9999;
+            transition:
+                width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                background-color 0.35s ease,
+                border-color 0.35s ease,
+                border-width 0.35s ease,
+                rotate 0.4s ease;
         }
+
+        /* The ripple ring inside the outline. Only visible during hover. */
+        .cursor-outline::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 1.5px solid var(--accent-cyan);
+            opacity: 0;
+            pointer-events: none;
+            transform-origin: center center;
+        }
+
+        /* ---- Hover state — the "special" animation ----
+           • the ring grows and becomes a spinning dashed circle
+             (like a record groove or a targeting reticle)
+           • a soft glow pulses in and out
+           • a secondary ring ripples outward every ~2 s
+        */
         .cursor-outline.hovering {
             width: 60px;
             height: 60px;
-            background-color: rgba(var(--accent-cyan-rgb), 0.1);
-            border-color: var(--accent-cyan);
+            border: 2px dashed var(--accent-cyan);
+            background-color: rgba(var(--accent-cyan-rgb), 0.06);
+            animation:
+                cursorSpin 6s linear infinite,
+                cursorPulse 1.8s ease-in-out infinite;
+        }
+
+        .cursor-outline.hovering::before {
+            animation: cursorRipple 2.2s ease-out infinite;
+        }
+
+        @keyframes cursorSpin {
+            from { rotate: 0deg; }
+            to   { rotate: 360deg; }
+        }
+
+        @keyframes cursorPulse {
+            0%, 100% {
+                box-shadow:
+                    0 0 0 0 rgba(var(--accent-cyan-rgb), 0),
+                    0 0 18px 2px rgba(var(--accent-cyan-rgb), 0.28);
+            }
+            50% {
+                box-shadow:
+                    0 0 0 5px rgba(var(--accent-cyan-rgb), 0.08),
+                    0 0 32px 6px rgba(var(--accent-cyan-rgb), 0.55);
+            }
+        }
+
+        @keyframes cursorRipple {
+            0% {
+                transform: scale(0.9);
+                opacity: 0.65;
+            }
+            100% {
+                transform: scale(2.4);
+                opacity: 0;
+            }
         }
 
         /* =========================================
@@ -293,7 +384,7 @@
             gap: 4px;
             background: transparent;
             border: none;
-            cursor: pointer;
+            cursor: none;
             padding: 8px;
         }
         .nav-toggle span {
@@ -639,7 +730,7 @@
         }
         .changelog-entry summary {
             list-style: none;
-            cursor: pointer;
+            cursor: none;
             padding: 20px 24px;
             display: flex;
             align-items: center;
@@ -1103,9 +1194,16 @@
            Responsive — Mobile-first improvements
            ========================================= */
         @media (pointer: coarse) {
-            body { cursor: auto; }
+            body,
+            a, button, summary, input, textarea, select,
+            [role="button"], [role="link"], [onclick] {
+                cursor: auto;
+            }
+            a, button, summary, [role="button"], [role="link"] {
+                cursor: pointer;
+            }
             .cursor-dot, .cursor-outline { display: none; }
-            #backToTop, .theme-toggle, button { cursor: pointer; }
+            #backToTop, .theme-toggle, .nav-toggle { cursor: pointer; }
         }
 
         @media (max-width: 900px) {
@@ -1226,6 +1324,14 @@
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
                 transition-duration: 0.01ms !important;
+            }
+            /* Turn off the continuous cursor spin / pulse / ripple.
+               Keep the size + color change, which is motion-safe. */
+            .cursor-outline.hovering {
+                animation: none !important;
+            }
+            .cursor-outline.hovering::before {
+                animation: none !important;
             }
         }
     </style>
@@ -1694,9 +1800,26 @@
                 requestAnimationFrame(animateCursor);
             })();
 
-            document.querySelectorAll('a, button, .card').forEach(el => {
-                el.addEventListener('mouseenter', () => cursorOutline.classList.add('hovering'));
-                el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hovering'));
+            // Add the .hovering class to BOTH the dot and the outline on
+            // every clickable / interactive element. The CSS then animates
+            // the outline into a spinning dashed ring with a glow and a
+            // radial ripple, and shifts the dot to accent purple.
+            //
+            // The selector includes:
+            //   * a, button      — every link and button
+            //   * summary        — expandable changelog entries
+            //   * .card          — feature cards (their inner hover glow
+            //                      makes them feel interactive even
+            //                      though they don't navigate)
+            document.querySelectorAll('a, button, summary, .card').forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    cursorOutline.classList.add('hovering');
+                    cursorDot.classList.add('hovering');
+                });
+                el.addEventListener('mouseleave', () => {
+                    cursorOutline.classList.remove('hovering');
+                    cursorDot.classList.remove('hovering');
+                });
             });
         }
 
