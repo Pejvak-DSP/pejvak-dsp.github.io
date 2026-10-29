@@ -118,46 +118,49 @@
             pointer-events: none;
         }
 
-        /* Base dot: small cyan point that tracks the mouse */
+        /* ---- Small tracking dot ----
+           Base: cyan. On hover: smoothly transitions to purple.
+           Size never changes — only the color. */
         .cursor-dot {
             width: 8px;
             height: 8px;
             background-color: var(--accent-cyan);
             box-shadow: 0 0 10px var(--accent-cyan);
             z-index: 10000;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        /* Base ring: lagging cyan outline */
+        .cursor-dot.hovering {
+            background-color: var(--accent-purple);
+            box-shadow:
+                0 0 14px var(--accent-purple),
+                0 0 22px rgba(var(--accent-purple-rgb), 0.45);
+        }
+
+        /* ---- Lagging outline ring ----
+           Base: 40px, cyan, thin solid border.
+           On hover: color shifts to purple, and the ring pulses between
+           22px (scale 0.55) and 40px (scale 1.0). The largest visible size
+           during the pulse is exactly the normal 40px — the ring never
+           grows beyond its resting size, it only shrinks and returns. */
         .cursor-outline {
             width: 40px;
             height: 40px;
             border: 1px solid rgba(var(--accent-cyan-rgb), 0.5);
             z-index: 9999;
-            transition:
-                width 0.25s ease,
-                height 0.25s ease,
-                background-color 0.25s ease,
-                border-color 0.25s ease;
+            transform-origin: center center;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
         }
 
-        /* ---- Hover state: grow slightly + soft blink ---- */
         .cursor-outline.hovering {
-            width: 60px;
-            height: 60px;
-            background-color: rgba(var(--accent-cyan-rgb), 0.08);
-            border-color: var(--accent-cyan);
+            border-color: var(--accent-purple);
+            background-color: rgba(var(--accent-purple-rgb), 0.05);
+            animation: cursorRingPulse 1.4s ease-in-out infinite;
         }
 
-        /* Both dot and ring blink together — smooth opacity pulse.
-           No scale, no rotation, no movement — only a soft fade. */
-        .cursor-dot.hovering,
-        .cursor-outline.hovering {
-            animation: cursorBlink 2s ease-in-out infinite;
-        }
-
-        @keyframes cursorBlink {
-            0%, 60%, 100% { opacity: 1; }
-            70%, 80%       { opacity: 0.35; }
+        @keyframes cursorRingPulse {
+            0%, 100% { scale: 1;    }   /* 40px = normal = largest */
+            50%      { scale: 0.55; }   /* 22px = smallest        */
         }
 
         /* =========================================
@@ -1152,15 +1155,13 @@
             nav.scrolled .logo-img { height: 34px; }
         }
 
+        /* Reduced motion: turn off the ring pulse, keep the color change. */
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
                 transition-duration: 0.01ms !important;
             }
-            /* Keep the size + color change on hover (motion-safe), but
-               turn off the blink loop for users who prefer less motion. */
-            .cursor-dot.hovering,
             .cursor-outline.hovering {
                 animation: none !important;
             }
@@ -1582,9 +1583,9 @@
                 requestAnimationFrame(animateCursor);
             })();
 
-            // Hover: add .hovering to both dot and ring. The CSS handles
-            // the rest — outline grows and both blink softly (opacity only,
-            // no scaling, no rotation, no movement).
+            // Hover: color shifts to purple on both dot and ring, and the
+            // ring pulses between 40px (normal) and 22px. Nothing spins,
+            // nothing moves — only color and scale.
             document.querySelectorAll('a, button, summary, .card').forEach(el => {
                 el.addEventListener('mouseenter', () => {
                     cursorOutline.classList.add('hovering');
