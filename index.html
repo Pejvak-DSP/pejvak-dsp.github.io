@@ -119,8 +119,8 @@
         }
 
         /* ---- Small tracking dot ----
-           Base: cyan. On hover: smoothly transitions to purple.
-           Size never changes — only the color. */
+           Base: cyan. On hover over a clickable element: smoothly
+           transitions to purple. Size never changes — only color. */
         .cursor-dot {
             width: 8px;
             height: 8px;
@@ -139,18 +139,16 @@
 
         /* ---- Lagging outline ring ----
            Base: 40px, cyan, thin solid border.
+           On hover over a clickable element: color shifts to purple and
+           the ring pulses via width/height. Because the ring uses
+           `transform: translate(-50%, -50%)` for centering, the browser
+           re-resolves the -50% offset against the new size on every
+           frame — so the ring's centre stays pinned exactly on the
+           cursor. No movement, no rotation, no scale.
 
-           On hover:
-             * color shifts to purple
-             * the ring shrinks and grows back — pure width/height
-               animation, so the ring is guaranteed to stay centred
-               exactly on the cursor. No rotation, no scale, no
-               transform trickery that could make it look like it
-               drifts or pulses off-centre.
-
-           The largest visible size during the animation is exactly
-           the normal 40px — the ring never grows beyond its resting
-           size, it only shrinks and returns. */
+           The largest visible size during the pulse is exactly the
+           normal 40px — the ring never grows beyond its resting size,
+           it only shrinks and returns. */
         .cursor-outline {
             width: 40px;
             height: 40px;
@@ -1596,14 +1594,13 @@
                 requestAnimationFrame(animateCursor);
             })();
 
-            // Hover: color shifts to purple on both dot and ring, and the
-            // ring's width/height animates so it shrinks and grows back.
-            // Because the ring uses `transform: translate(-50%, -50%)` for
-            // centering, the browser re-resolves that -50% against the new
-            // width/height on every frame, so the ring's centre stays
-            // pinned exactly on the cursor. No movement, no rotation, no
-            // scale — only size change.
-            document.querySelectorAll('a, button, summary, .card').forEach(el => {
+            // Hover animation is added ONLY to genuinely interactive
+            // elements: real links (<a>), buttons (<button>), and the
+            // expandable changelog <summary>. The .card elements in the
+            // "Everything you need." grid are NOT clickable — they only
+            // have a decorative hover glow — so the cursor stays in its
+            // normal state over them.
+            document.querySelectorAll('a, button, summary').forEach(el => {
                 el.addEventListener('mouseenter', () => {
                     cursorOutline.classList.add('hovering');
                     cursorDot.classList.add('hovering');
@@ -1616,6 +1613,8 @@
         }
 
         // ---- 5. Card hover glow ----
+        // The decorative radial glow still follows the mouse — only the
+        // cursor animation is disabled on these cards.
         document.querySelectorAll('.card').forEach(card => {
             card.addEventListener('mousemove', e => {
                 const rect = card.getBoundingClientRect();
