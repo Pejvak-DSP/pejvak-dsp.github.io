@@ -83,8 +83,6 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Hide the OS cursor everywhere so the hand never appears.
-           The custom dot + ring becomes the only visible pointer. */
         a, button, summary, input, textarea, select,
         [role="button"], [role="link"], [onclick] {
             cursor: none;
@@ -149,14 +147,8 @@
         }
 
         @keyframes cursorRingPulse {
-            0%, 100% {
-                width: 40px;
-                height: 40px;
-            }
-            50% {
-                width: 22px;
-                height: 22px;
-            }
+            0%, 100% { width: 40px; height: 40px; }
+            50% { width: 22px; height: 22px; }
         }
 
         /* =========================================
@@ -556,9 +548,10 @@
         /* =========================================
            Shared Section Styles
            ========================================= */
-        .about, .features, .changelog, .download, .credits { padding: 100px 48px; }
+        .about, .features, .listen, .changelog, .download, .credits { padding: 100px 48px; }
         .about { max-width: 800px; margin: 0 auto; text-align: center; }
         .features { max-width: 1200px; margin: 0 auto; }
+        .listen { max-width: 900px; margin: 0 auto; }
         .changelog { max-width: 900px; margin: 0 auto; }
         .download { text-align: center; background: linear-gradient(to bottom, transparent, var(--footer-bg)); }
         .credits { max-width: 1000px; margin: 0 auto; }
@@ -620,6 +613,100 @@
         .card-icon { font-size: 2rem; margin-bottom: 16px; display: block; }
         .card h3 { font-size: 1.25rem; margin-bottom: 12px; font-weight: 600; }
         .card p { color: var(--text-dim); font-size: 0.95rem; }
+
+        /* =========================================
+           SoundCloud / Listen Section
+           ========================================= */
+        .soundcloud-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow:
+                0 30px 90px rgba(0, 0, 0, 0.35),
+                0 0 0 1px rgba(var(--accent-cyan-rgb), 0.06),
+                0 0 60px rgba(var(--accent-cyan-rgb), 0.04);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+        }
+        .soundcloud-card:hover {
+            border-color: rgba(var(--accent-cyan-rgb), 0.3);
+            box-shadow:
+                0 30px 90px rgba(0, 0, 0, 0.45),
+                0 0 0 1px rgba(var(--accent-cyan-rgb), 0.15),
+                0 0 80px rgba(var(--accent-cyan-rgb), 0.06);
+        }
+        .soundcloud-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 24px;
+            background: rgba(var(--accent-cyan-rgb), 0.03);
+            border-bottom: 1px solid var(--border);
+        }
+        .soundcloud-card-icon {
+            font-size: 1.6rem;
+            line-height: 1;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 8px rgba(var(--accent-cyan-rgb), 0.3));
+        }
+        .soundcloud-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .soundcloud-card-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+            letter-spacing: -0.2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .soundcloud-card-subtitle {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        .soundcloud-card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(var(--accent-cyan-rgb), 0.08);
+            border: 1px solid rgba(var(--accent-cyan-rgb), 0.25);
+            border-radius: 8px;
+            color: var(--accent-cyan);
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .soundcloud-card-link:hover {
+            background: rgba(var(--accent-cyan-rgb), 0.16);
+            border-color: var(--accent-cyan);
+            opacity: 1;
+            transform: translateY(-1px);
+        }
+        .soundcloud-card-link svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+        .soundcloud-card-embed {
+            position: relative;
+            width: 100%;
+            background: #0a0f1e;
+        }
+        .soundcloud-card-embed iframe {
+            display: block;
+            width: 100%;
+            border: 0;
+        }
 
         /* =========================================
            Changelog
@@ -1115,7 +1202,7 @@
             .hero-actions { flex-direction: column; width: 100%; max-width: 320px; }
             .btn { width: 100%; text-align: center; }
 
-            .about, .features, .changelog, .download, .credits, .requirements { padding: 60px 20px; }
+            .about, .features, .listen, .changelog, .download, .credits, .requirements { padding: 60px 20px; }
 
             .grid { grid-template-columns: 1fr; }
             .download-grid { flex-direction: column; align-items: stretch; }
@@ -1142,6 +1229,17 @@
             .credits-grid { grid-template-columns: 1fr; }
             .refs-list { grid-template-columns: 1fr; }
             .credit-card, .refs-block, .license-card { padding: 20px; }
+
+            /* SoundCloud responsive */
+            .soundcloud-card-header {
+                flex-wrap: wrap;
+                padding: 16px 18px;
+                gap: 12px;
+            }
+            .soundcloud-card-link {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1149,18 +1247,16 @@
             .hero-badge { font-size: 0.7rem; padding: 4px 12px; }
             .logo-img { height: 40px; }
             nav.scrolled .logo-img { height: 34px; }
+            .soundcloud-card-icon { font-size: 1.4rem; }
         }
 
-        /* Reduced motion: turn off the ring pulse, keep the color change. */
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
                 transition-duration: 0.01ms !important;
             }
-            .cursor-outline.hovering {
-                animation: none !important;
-            }
+            .cursor-outline.hovering { animation: none !important; }
         }
     </style>
 </head>
@@ -1193,6 +1289,7 @@
         <div class="nav-links" id="navLinks">
             <a href="#about">About</a>
             <a href="#features">Features</a>
+            <a href="#listen">Listen</a>
             <a href="#changelog">Changelog</a>
             <a href="#download">Download</a>
             <a href="#requirements">Requirements</a>
@@ -1304,9 +1401,54 @@
                 <p>Zero allocation on the audio thread and f64 precision for ultimate stability and performance.</p>
             </div>
             <div class="card fade-up">
+                <span class="card-icon">🚀</span>
+                <h3>Bit-Exact SIMD</h3>
+                <p>Four-lane <code>f64</code> vectorization on the three hot loops (stereo cross-blend and M/S width). No FMA, no reassociation — output stays bit-identical to scalar.</p>
+            </div>
+            <div class="card fade-up">
                 <span class="card-icon">⌨️</span>
                 <h3>DAW Shortcut Forwarding</h3>
                 <p>Use Space, Numpad, and other standard DAW shortcuts directly from the plugin window — no focus loss.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         Listen — SoundCloud Playlist
+         ========================================= -->
+    <section id="listen" class="listen">
+        <h2 class="section-title fade-up">Hear it in action.</h2>
+        <p class="section-subtitle fade-up">A curated playlist showcasing both reverb engines, the Texture Rack, and ILLUSION — across ambient, film, and experimental music.</p>
+
+        <div class="soundcloud-card fade-up">
+            <div class="soundcloud-card-header">
+                <div class="soundcloud-card-icon">🎧</div>
+                <div class="soundcloud-card-info">
+                    <div class="soundcloud-card-title">PejvakRVB — Reverb Plugin</div>
+                    <div class="soundcloud-card-subtitle">by Pejvak DSP · SoundCloud Playlist</div>
+                </div>
+                <a
+                    href="https://soundcloud.com/pejvakdsp/sets/pejvakrvb-reverb-plugin"
+                    target="_blank"
+                    rel="noopener"
+                    class="soundcloud-card-link"
+                    aria-label="Open playlist on SoundCloud">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Open on SoundCloud
+                </a>
+            </div>
+            <div class="soundcloud-card-embed">
+                <iframe
+                    width="100%"
+                    height="400"
+                    scrolling="no"
+                    frameborder="no"
+                    allow="autoplay; encrypted-media"
+                    loading="lazy"
+                    src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/soundcloud%253Aplaylists%253A2323174089&color=%2367e8f9&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
+                </iframe>
             </div>
         </div>
     </section>
@@ -1334,23 +1476,23 @@
 
                     <h4>Changed</h4>
                     <ul>
-                        <li><strong>Native aspect-ratio window resizing</strong> — replaced the <code>ResizableWindow</code> wrapper with a native <code>ui.max_rect()</code> approach. The plugin now enforces a strict 1100:570 aspect ratio when the user releases the mouse after resizing, preventing empty letterboxed areas and ensuring the UI scales uniformly in both axes.</li>
+                        <li><strong>Native aspect-ratio window resizing</strong> — replaced the <code>ResizableWindow</code> wrapper with a native <code>ui.max_rect()</code> approach. The plugin now enforces a strict 1100:570 aspect ratio when the user releases the mouse after resizing.</li>
                         <li><strong>Keyboard forwarding strategy</strong> — completely rewrote the Windows keyboard forwarding logic. Replaced <code>SendInput</code> and <code>SetForegroundWindow</code> with <code>PostMessageW</code> directed to the DAW's parent window (<code>GetParent(GetFocus())</code>).</li>
                         <li><strong>Menu order</strong> — the "About" menu item has been moved to the bottom of the ☰ menu, below "Show pop-ups".</li>
                         <li><strong>Larger card heights</strong> — increased the vertical height of the Mixer, Filter, Route, and Velvet Noise cards to fill the available space more naturally.</li>
-                        <li><strong>Texture chip typography</strong> — the text inside the Texture Signal Chain chips is now larger (11.5pt) and uses a faux-bold rendering technique (double-drawn with a slight offset) for better readability.</li>
+                        <li><strong>Texture chip typography</strong> — the text inside the Texture Signal Chain chips is now larger (11.5pt) and uses a faux-bold rendering technique for better readability.</li>
                     </ul>
 
                     <h4>Fixed</h4>
                     <ul>
                         <li><strong>Infinite loop / Play-Stop flickering in Reaper</strong> — the previous <code>SendInput</code> method caused DAWs with embedded plugin windows (like Reaper) to echo keys back to the plugin infinitely. The new <code>PostMessageW</code> approach, combined with a 50 ms <code>LAST_FORWARDED_KEY</code> mutex (Loop Prevention), completely eliminates this.</li>
-                        <li><strong>Numpad and shortcut keys not working in DAWs (e.g., Sonar)</strong> — fixed the <code>lParam</code> scancodes and Extended flags for Numpad operators. Also added the missing standard keys to the mapping table so DAW transport controls respond correctly.</li>
-                        <li><strong><code>text_edit_active</code> getting stuck</strong> — added a check for <code>m.focused().is_none()</code>. If no widget is focused in <code>egui</code>, the flag is forcibly cleared, preventing keyboard forwarding from being silently disabled.</li>
-                        <li><strong>TX kill switch unresponsive when all layers were off</strong> — removed the <code>any_enabled</code> guard so the TX button can always be toggled to lock/unlock the texture layers, even if they are already disabled.</li>
-                        <li><strong>Menu not closing after clicking "Show pop-ups"</strong> — added <code>clicked_item</code> assignment to the toggle row, ensuring the menu closes immediately upon interaction.</li>
-                        <li><strong>Window size resetting to 100%</strong> — fixed the issue where <code>editor_size</code> was not correctly read by the DAW on startup. The <code>PejvakEditor::size()</code> method now explicitly returns <code>NativeSize { width, height }</code> read from the persisted state.</li>
-                        <li><strong>Compilation errors with <code>egui 0.37</code></strong> — replaced the removed <code>Context::screen_rect()</code> with <code>Context::viewport_rect()</code>, and removed the nonexistent <code>egui::Key::Asterisk</code> variant.</li>
-                        <li><strong><code>set_requested_size</code> missing</strong> — removed the deprecated <code>EguiEditorState::set_requested_size</code> call (removed in <code>nice-plug-egui 0.6.0</code>) and moved the initial resize logic into the first frame of the <code>ui()</code> function.</li>
+                        <li><strong>Numpad and shortcut keys not working in DAWs (e.g., Sonar)</strong> — fixed the <code>lParam</code> scancodes and Extended flags for Numpad operators.</li>
+                        <li><strong><code>text_edit_active</code> getting stuck</strong> — added a check for <code>m.focused().is_none()</code>.</li>
+                        <li><strong>TX kill switch unresponsive when all layers were off</strong> — removed the <code>any_enabled</code> guard so the TX button can always be toggled.</li>
+                        <li><strong>Menu not closing after clicking "Show pop-ups"</strong> — added <code>clicked_item</code> assignment to the toggle row.</li>
+                        <li><strong>Window size resetting to 100%</strong> — fixed the issue where <code>editor_size</code> was not correctly read by the DAW on startup.</li>
+                        <li><strong>Compilation errors with <code>egui 0.37</code></strong> — replaced the removed <code>Context::screen_rect()</code> with <code>Context::viewport_rect()</code>.</li>
+                        <li><strong><code>set_requested_size</code> missing</strong> — removed the deprecated call (removed in <code>nice-plug-egui 0.6.0</code>) and moved the initial resize logic into the first frame.</li>
                     </ul>
 
                     <h4>Notes</h4>
@@ -1372,53 +1514,45 @@
                     <ul>
                         <li><strong>Check for Updates</strong> — a new item in the ☰ menu that queries the GitHub Releases API, compares the remote tag against <code>CARGO_PKG_VERSION</code>, and displays the release notes for any newer version. Download runs on a background thread with SHA-256 verification as it streams.</li>
                         <li><strong>Bypass pulse</strong> — when the Bypass toggle is engaged, its background and label luminance now "breathe" at 1.5 Hz.</li>
-                        <li><strong>Plugin disabled overlay</strong> — when the host takes the plugin offline, a full-window dimmed overlay appears with the message "PLUGIN DISABLED — Enable the plugin in your DAW to resume editing."</li>
+                        <li><strong>Plugin disabled overlay</strong> — when the host takes the plugin offline, a full-window dimmed overlay appears.</li>
                         <li><strong>ILLUSION <code>Spark</code> fade-in</strong> — moving Spark from exactly 0 to any positive value now fades the granular cloud in over one second.</li>
-                        <li><strong>ILLUSION <code>Rate</code> maximum raised to 10 Hz</strong> — the clock speed of the granular cloud can now reach 10 Hz (previously 8 Hz).</li>
+                        <li><strong>ILLUSION <code>Rate</code> maximum raised to 10 Hz</strong> — the clock speed of the granular cloud can now reach 10 Hz.</li>
                         <li><strong>Releases now ship proper installers</strong> — <code>release.yml</code> produces a self-extracting <code>.exe</code> for Windows, a <code>.pkg</code> for macOS, and a <code>.tar.gz</code> for Linux.</li>
                     </ul>
 
                     <h4>Changed</h4>
                     <ul>
                         <li><strong>Texture layer seeds are now per-instance</strong> — Crystal, Scatter, and ILLUSION previously seeded their grain RNG with a fixed constant, so two instances of the plugin in the same session played the exact same random sequence. Seeds now mix in a global instance counter.</li>
-                        <li><strong>Documentation corrections</strong> — the Velvet saturation stage's asymptote is 1.8 (not "limits to 1.0"), the Mist LFO range is 0.05–25 Hz (not 0.05–2 Hz), and the crate docs list Bloom (not Ghost) among the texture layers.</li>
-                        <li><strong>README security section</strong> — a new top-level section documents the audio-thread safety contract, the Smart Idle behaviour, the updater's HTTPS-only / SHA-256 / explicit-confirmation design, and the input validation guarantees.</li>
+                        <li><strong>Documentation corrections</strong> — the Velvet saturation stage's asymptote is 1.8, the Mist LFO range is 0.05–25 Hz, and the crate docs list Bloom (not Ghost) among the texture layers.</li>
                     </ul>
 
                     <h4>Fixed</h4>
                     <ul>
-                        <li><strong>Typed integer values for PreDelay and TapLength were off by one</strong> — typing "80" into PreDelay displayed "79 ms", and typing "450" into TapLength displayed "449 ms". The new implementation walks f32 ULPs outward from the bisection midpoint until <code>scaled_parameter_value</code> returns the target integer.</li>
-                        <li><strong>Out-of-bounds read at maximum PreDelay</strong> — at its 1000 ms maximum the PreDelay parameter requested exactly <code>sample_rate</code> samples, equalling the delay buffer length. <code>ModulatedDelay::update()</code> now clamps the delay to the usable range (<code>len - 2</code>), and the pre-delay buffers carry two samples of headroom.</li>
-                        <li><strong>Sample-rate changes left rate-derived buffers stale</strong> — <code>set_samplerate</code>/<code>set_sample_rate</code> refreshed filter coefficients but never reallocated the buffers sized from the construction rate. All of them now reallocate on rate change (control path only).</li>
-                        <li><strong>Velvet feedback matrix dropped trailing lines</strong> — <code>VelvetMatrix</code> truncated the line count to the nearest multiple of its 4-line block, so line counts of 5, 6, 7, 9, 10, 11 left the trailing lines' feedback inputs unwritten. A final partial block is now handled as a smaller Householder reflection.</li>
-                        <li><strong>Typed "800 ms" decay parsed as 800 seconds</strong> — the LineDecay parameter is stored in seconds but displayed in milliseconds below one second; the text parser only handled the seconds reading. "800 ms" now parses to 0.8 s.</li>
-                        <li><strong>Texture chain order not persisted</strong> — the layer arrangement of the Texture Rack was session-only; reloading a project silently reverted to the default order. The packed order is now saved with the plugin state (<code>#[persist = "texture_order"]</code>).</li>
-                        <li><strong>A repeating panic no longer degrades the audio thread indefinitely</strong> — the first caught panic still wipes the DSP and re-pushes all parameters; a second strike latches the engine to silence until <code>activate</code>/<code>reset</code> re-arms it.</li>
+                        <li><strong>Typed integer values for PreDelay and TapLength were off by one</strong> — the new implementation walks f32 ULPs outward from the bisection midpoint.</li>
+                        <li><strong>Out-of-bounds read at maximum PreDelay</strong> — <code>ModulatedDelay::update()</code> now clamps the delay to the usable range (<code>len - 2</code>).</li>
+                        <li><strong>Sample-rate changes left rate-derived buffers stale</strong> — all rate-derived buffers now reallocate on rate change.</li>
+                        <li><strong>Velvet feedback matrix dropped trailing lines</strong> — a final partial block is now handled as a smaller Householder reflection.</li>
+                        <li><strong>Typed "800 ms" decay parsed as 800 seconds</strong> — "800 ms" now parses to 0.8 s.</li>
+                        <li><strong>Texture chain order not persisted</strong> — the packed order is now saved with the plugin state.</li>
+                        <li><strong>A repeating panic no longer degrades the audio thread indefinitely</strong> — two-strike latch.</li>
                         <li><strong>CI pin for <code>cargo-nice-plug</code></strong> — the release workflow now installs <code>cargo-nice-plug</code> at <code>--version 0.1.1</code>.</li>
-                        <li><strong><code>if_same_then_else</code> clippy errors</strong> — <code>parse_parameter</code> merged its dB / percent / line-decay branches into single conditions, and <code>scatter_density_parser</code> merged its two grain-rate branches.</li>
-                        <li><strong><code>type_complexity</code> clippy errors in the updater</strong> — the return type of <code>updater::check_inner</code> was factored into a <code>CheckResult</code> type alias, and the twenty parser functions in <code>lib.rs</code> now share a single <code>Parser</code> alias.</li>
+                        <li><strong><code>if_same_then_else</code> clippy errors</strong> — merged branches in <code>parse_parameter</code> and <code>scatter_density_parser</code>.</li>
+                        <li><strong><code>type_complexity</code> clippy errors in the updater</strong> — factored return types into <code>CheckResult</code> and <code>Parser</code> aliases.</li>
                     </ul>
 
                     <h4>Security</h4>
                     <ul>
-                        <li><strong>Command injection in <code>manual.rs::open_path</code> (Windows)</strong> — the previous implementation called <code>cmd /c start "" "<path>"</code>. The function now calls <code>ShellExecuteW</code> directly via <code>windows-sys</code>, which takes a wide string and never goes through the shell. The same fix was applied to <code>updater.rs::open_url</code>.</li>
-                        <li><strong>Updater network requests are HTTPS-only</strong> — <code>ureq</code> is configured through <code>AgentBuilder::https_only(true)</code>.</li>
-                        <li><strong>Updater installers are SHA-256 verified as they download</strong> — the <code>download_installer</code> function streams the response through a <code>Sha256</code> hasher, then compares the result against GitHub's immutable <code>digest</code> field. A mismatch deletes the partial file and refuses the install.</li>
-                        <li><strong>Updater threads are wrapped in <code>catch_unwind</code></strong> — <code>start_update_check</code> and <code>start_update_download</code> run <code>check_now()</code> / <code>download_installer()</code> inside <code>std::panic::catch_unwind(AssertUnwindSafe(...))</code>.</li>
-                        <li><strong>Defensive clamps in the DSP <code>unsafe</code> paths</strong> — <code>ModulatedAllpass::process_no_mod</code> clamps <code>sample_delay</code> to <code>DELAY_BUFFER_SAMPLES</code>, <code>ModulatedDelay::new</code> clamps <code>delay_buffer_size_samples</code> to at least 2, and <code>MultitapDiffuser::new</code> clamps <code>delay_buffer_size</code> to at least 1.</li>
-                    </ul>
-
-                    <h4>Removed</h4>
-                    <ul>
-                        <li>Dead <code>mono_scratch</code> buffer from the plugin wrapper (a per-block copy on the mono path that was never read).</li>
+                        <li><strong>Command injection in <code>manual.rs::open_path</code> (Windows)</strong> — now uses <code>ShellExecuteW</code> directly via <code>windows-sys</code>.</li>
+                        <li><strong>Updater network requests are HTTPS-only</strong> — <code>ureq</code> is configured with <code>https_only(true)</code>.</li>
+                        <li><strong>Updater installers are SHA-256 verified as they download</strong> — mismatch deletes the partial file and refuses the install.</li>
+                        <li><strong>Updater threads are wrapped in <code>catch_unwind</code></strong>.</li>
+                        <li><strong>Defensive clamps in the DSP <code>unsafe</code> paths</strong>.</li>
                     </ul>
 
                     <h4>Notes</h4>
                     <ul>
                         <li><strong>Full DSP bit-exactness verified</strong> — <code>cargo test -p fdn_reverb_core</code> runs 42 tests, all passing.</li>
-                        <li><strong>Test count</strong> — 53 tests total: 42 DSP tests in <code>fdn_reverb_core</code>, 11 plugin tests in <code>Pejvak_RVB</code>.</li>
-                        <li><strong>Logo quality in the About modal</strong> — <code>manual/logo.png</code> is currently low-resolution (~150×200 px) and is upscaled to <code>64.0 × scale</code> logical pixels in the About modal, producing a pixelated look. This is a <strong>file</strong> issue, not a code issue — replacing the file with a 1024×1024 transparent PNG fixes it with zero code changes.</li>
-                        <li><strong>Dynamics parameter tuning in factory presets</strong> — because the Attack, Ducking, and Gate stages are now significantly more audible at the same parameter values, some factory presets (e.g. <em>FFDN Soft Attack Hall</em> at <code>attack = 0.55</code>) may feel stronger than before.</li>
+                        <li><strong>Test count</strong> — 53 tests total: 42 DSP tests, 11 plugin tests.</li>
                         <li><strong>Code signing</strong> — the Windows <code>.exe</code> and the macOS <code>.pkg</code> are not yet Authenticode- or Developer-ID-signed, so Windows SmartScreen and macOS Gatekeeper will warn users on first run.</li>
                     </ul>
                 </div>
@@ -1433,20 +1567,19 @@
                 <div class="changelog-body">
                     <h4>Fixed</h4>
                     <ul>
-                        <li><strong>Zipper noise on manual fader movement</strong> — all output-stage gains now use per-sample one-pole smoothing (10 ms). Dragging a fader with the mouse no longer produces a staircase amplitude modulation.</li>
-                        <li><strong>Zipper noise on host automation</strong> — <code>SAMPLE_ACCURATE_AUTOMATION</code> disabled. Full host buffers are processed, so parameter values stay constant within a block and no step can occur.</li>
-                        <li><strong>FFDN delay buffer</strong> — now scales with sample rate (<code>500 ms × sample_rate</code>) instead of being hard-coded to <code>24000</code> samples.</li>
-                        <li><strong>FFDN feedback computed from clamped delay</strong> — prevents premature tail truncation when Size exceeds buffer capacity.</li>
+                        <li><strong>Zipper noise on manual fader movement</strong> — all output-stage gains now use per-sample one-pole smoothing (10 ms).</li>
+                        <li><strong>Zipper noise on host automation</strong> — <code>SAMPLE_ACCURATE_AUTOMATION</code> disabled.</li>
+                        <li><strong>FFDN delay buffer</strong> — now scales with sample rate (<code>500 ms × sample_rate</code>).</li>
+                        <li><strong>FFDN feedback computed from clamped delay</strong> — prevents premature tail truncation.</li>
                         <li><strong>Velvet-Noise filter is now sample-rate aware</strong> — pulse count, LP coefficient, and RRS width all scale correctly at 44.1 / 48 / 88.2 / 96 kHz.</li>
-                        <li><strong>FFDN drive stability</strong> — <code>velvet_saturate</code> no longer applies a makeup gain. Restores unity small-signal gain and eliminates the FDN instability at high drive amounts.</li>
-                        <li><strong>FFDN Dynamics audibility</strong> — Attack now uses a square-root curve and blend-based attenuation. Ducking uses a dB-mapped exponential (up to −24 dB). Gate threshold widened to [−60, −10] dBFS with a squared fade.</li>
-                        <li><strong>Undo/redo no longer cuts the reverb tail</strong> — snapshots do not reset the DSP state, so undoing a parameter edit produces a smooth 10 ms ramp instead of an audible cut.</li>
-                        <li><strong>Canonical factory presets</strong> — <code>apply_factory_preset</code> resets texture extras, Velvet, FFDN card masters, and EQ master before applying. Every factory preset produces a complete, reproducible state.</li>
-                        <li><strong>Partial XML presets — CloudSeed</strong> — <code>ParsedPreset.cloudseed</code> is now <code>[Option&lt;f32&gt;; 49]</code>. Files with only FFDN, only Illusion, or a subset of CloudSeed load non-destructively.</li>
-                        <li><strong>Partial XML presets — Texture Rack</strong> — <code>ParsedPreset.texture</code> and <code>.enabled</code> are now <code>[Option&lt;f32&gt;; 32]</code> and <code>[Option&lt;bool&gt;; 6]</code>. XML without a <code>&lt;TextureRack&gt;</code> block no longer resets texture parameters.</li>
-                        <li><strong>Clippy-clean workspace</strong> — all 26 production lints and 23 UI/test lints resolved. <code>cargo clippy --workspace --all-targets -- -D warnings</code> completes with zero warnings.</li>
-                        <li><strong>Redundant permutation loop</strong> removed in <code>velvet_matrix.rs</code>. Output was already bit-identical.</li>
-                        <li><strong>CI race condition</strong> — the three per-platform workflows were unified into a single <code>release.yml</code>. Builds upload artifacts, and exactly one release is created after all platforms succeed.</li>
+                        <li><strong>FFDN drive stability</strong> — <code>velvet_saturate</code> no longer applies a makeup gain.</li>
+                        <li><strong>FFDN Dynamics audibility</strong> — Attack now uses a square-root curve and blend-based attenuation. Ducking uses a dB-mapped exponential. Gate threshold widened with a squared fade.</li>
+                        <li><strong>Undo/redo no longer cuts the reverb tail</strong> — snapshots do not reset the DSP state.</li>
+                        <li><strong>Canonical factory presets</strong> — every factory preset produces a complete, reproducible state.</li>
+                        <li><strong>Partial XML presets — CloudSeed and Texture Rack</strong> — files with subsets of parameters load non-destructively.</li>
+                        <li><strong>Clippy-clean workspace</strong> — all lints resolved.</li>
+                        <li><strong>Redundant permutation loop</strong> removed in <code>velvet_matrix.rs</code>.</li>
+                        <li><strong>CI race condition</strong> — unified into a single <code>release.yml</code>.</li>
                     </ul>
 
                     <h4>Changed</h4>
@@ -1459,8 +1592,8 @@
 
                     <h4>Notes</h4>
                     <ul>
-                        <li>All 33 DSP tests pass. The suite covers every <code>*_is_bit_identical</code> and every <code>*_keeps_network_stable</code> check, so the audio path is verified to be unchanged.</li>
-                        <li>Factory presets with <code>attack &gt; 0</code> may sound stronger because the Dynamics stages are now much more audible at the same parameter values.</li>
+                        <li>All 33 DSP tests pass. The suite covers every <code>*_is_bit_identical</code> and every <code>*_keeps_network_stable</code> check.</li>
+                        <li>Factory presets with <code>attack &gt; 0</code> may sound stronger because the Dynamics stages are now much more audible.</li>
                     </ul>
                 </div>
             </details>
